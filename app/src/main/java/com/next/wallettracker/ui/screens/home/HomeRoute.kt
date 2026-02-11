@@ -17,18 +17,25 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.TrendingDown
+import androidx.compose.material.icons.automirrored.rounded.TrendingUp
 import androidx.compose.material.icons.filled.Payment
+import androidx.compose.material.icons.rounded.TrendingDown
+import androidx.compose.material.icons.rounded.TrendingUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -41,6 +48,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -48,6 +56,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.next.wallettracker.R
 import com.next.wallettracker.data.models.Transaction
 import com.next.wallettracker.data.models.TransactionType
+import com.next.wallettracker.ui.theme.WallettrackerTheme
 import com.next.wallettracker.ui.utils.toDisplayDate
 
 @Composable
@@ -64,24 +73,32 @@ fun HomeRoute(uiState: HomeUiState) {
         topBar = { HomeTopBar(R.string.app_name) }
     ) { paddingValues ->
 
-        if (uiState.isLoading) {
-            LoadingContent(Modifier.padding(paddingValues))
-        } else {
-            when (uiState) {
-                is HomeUiState.HasTransactions -> HasTransactionsScreen(
-                    modifier = Modifier.padding(paddingValues),
-                    balance = uiState.balance,
-                    totalIncome = uiState.totalIncome,
-                    totalExpense = uiState.totalExpense,
-                    recentTransactions = uiState.transactions
-                )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp),
+            contentAlignment = Alignment.Center
+        ) {
 
-                is HomeUiState.NoTransactions -> EmptyTransactionsScreen(
-                    image = painterResource(R.drawable.empty_wallet),
-                    title = R.string.title_empty_home,
-                    description = R.string.description_empty_home,
-                    textButton = R.string.text_button_empty_home
-                ) { }
+            if (uiState.isLoading) {
+                CircularProgressIndicator()
+            } else {
+                when (uiState) {
+                    is HomeUiState.HasTransactions -> HasTransactionsScreen(
+                        modifier = Modifier.padding(paddingValues),
+                        balance = uiState.balance,
+                        totalIncome = uiState.totalIncome,
+                        totalExpense = uiState.totalExpense,
+                        recentTransactions = uiState.transactions
+                    )
+
+                    is HomeUiState.NoTransactions -> EmptyTransactionsScreen(
+                        image = painterResource(R.drawable.empty_wallet),
+                        title = R.string.title_empty_home,
+                        description = R.string.description_empty_home,
+                        textButton = R.string.text_button_empty_home
+                    ) { }
+                }
             }
         }
     }
@@ -260,53 +277,121 @@ private fun BalanceCardOverview(balance: Double, totalExpense: Double, totalInco
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
             Text(
-                text = "Solde",
-                style = MaterialTheme.typography.titleMedium,
+                text = "Solde Total",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = String.format("%.0f FCFA", balance),
+                style = MaterialTheme.typography.headlineMedium.copy(
+                    fontWeight = FontWeight.Bold
+                ),
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = "$balance",
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
-            Spacer(Modifier.height(16.dp))
+
+            Spacer(Modifier.height(20.dp))
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Column {
-                    Text(
-                        text = "Revenu",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                    Text(
-                        text = "$totalIncome",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Surface(
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.tertiaryContainer,
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.TrendingUp,
+                            contentDescription = "Revenus",
+                            tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                            modifier = Modifier.padding(10.dp)
+                        )
+                    }
+                    Column {
+                        Text(
+                            text = "Revenus",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                        )
+                        Text(
+                            text = String.format("+%.0f", totalIncome),
+                            style = MaterialTheme.typography.titleSmall.copy(
+                                fontWeight = FontWeight.SemiBold
+                            ),
+                            color = MaterialTheme.colorScheme.tertiary
+                        )
+                    }
                 }
-                Column {
-                    Text(
-                        text = "Depense",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                    Text(
-                        text = "$totalExpense",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Surface(
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.errorContainer,
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.TrendingDown,
+                            contentDescription = "Dépenses",
+                            tint = MaterialTheme.colorScheme.onErrorContainer,
+                            modifier = Modifier.padding(10.dp)
+                        )
+                    }
+                    Column {
+                        Text(
+                            text = "Dépenses",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                        )
+                        Text(
+                            text = String.format("-%.0f", totalExpense),
+                            style = MaterialTheme.typography.titleSmall.copy(
+                                fontWeight = FontWeight.SemiBold
+                            ),
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
                 }
             }
+        }
+    }
+
+}
+
+@Preview
+@Composable
+private fun HasTransactionsScreenPreview(){
+    WallettrackerTheme {
+        Scaffold { paddingValues ->
+            HasTransactionsScreen(
+                balance = 12000.0,
+                totalExpense = 25000.0,
+                totalIncome = 45000.0,
+                recentTransactions = emptyList(),
+                modifier = Modifier.padding(paddingValues)
+            )
         }
     }
 }
