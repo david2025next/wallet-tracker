@@ -1,6 +1,4 @@
 package com.next.wallettracker.ui.utils
 
 
-fun Long.toDisplayDate() : String{
-    TODO()
-}
+fun Long.toDisplayDate() : String = "Hier"

@@ -4,4 +4,8 @@
     <string name="title_empty_home">No transactions yet</string>
     <string name="description_empty_home">Add your income and expenses to start tracking your budget</string>
     <string name="text_button_empty_home">Add my first transaction</string>
+    <string name="solde_total">Total Balance</string>
+    <string name="transactions_recentes">Recent Transactions</string>
+    <string name="revenu">Income</string>
+    <string name="depense">Expense</string>
 </resources>
