@@ -8,9 +8,13 @@ import com.next.wallettracker.data.models.BalanceSummary
 import com.next.wallettracker.data.models.Transaction
 import com.next.wallettracker.data.repository.TransactionsRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class TransactionsRepositoryImpl(
+@Singleton
+class TransactionsRepositoryImpl @Inject constructor(
     private val transactionDao: TransactionDao
 ) : TransactionsRepository {
 

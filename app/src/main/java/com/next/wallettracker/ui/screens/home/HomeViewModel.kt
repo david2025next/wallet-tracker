@@ -1,9 +1,11 @@
 package com.next.wallettracker.ui.screens.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.next.wallettracker.data.models.Transaction
 import com.next.wallettracker.data.repository.TransactionsRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collect
@@ -12,22 +14,26 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 sealed interface HomeUiState {
     val isLoading: Boolean
+    val totalIncome : Double
+    val totalExpense : Double
+    val balance : Double
 
     data class NoTransactions(
         override val isLoading: Boolean,
-        val totalExpense: Double,
-        val totalIncome: Double,
-        val balance: Double
+        override val totalExpense: Double,
+        override val totalIncome: Double,
+        override val balance: Double
     ) : HomeUiState
 
     data class HasTransactions(
         override val isLoading: Boolean,
-        val totalExpense: Double,
-        val totalIncome: Double,
-        val balance: Double,
+        override val totalExpense: Double,
+        override val totalIncome: Double,
+        override val balance: Double,
         val transactions: List<Transaction>
     ) : HomeUiState
 }
@@ -38,10 +44,10 @@ private data class HomeViewModelUiState(
     val totalExpense: Double = 0.0,
     val balance: Double = 0.0,
     val isLoading: Boolean = false,
-    val transactions: List<Transaction>? = null
+    val transactions: List<Transaction> = emptyList()
 ) {
 
-    fun toUiState(): HomeUiState = if (transactions == null) {
+    fun toUiState(): HomeUiState = if (transactions.isEmpty()) {
         HomeUiState.NoTransactions(
             isLoading = isLoading,
             totalExpense = totalExpense,
@@ -57,7 +63,9 @@ private data class HomeViewModelUiState(
     )
 }
 
-class HomeViewModel(private val transactionsRepository: TransactionsRepository) : ViewModel() {
+
+@HiltViewModel
+class HomeViewModel @Inject constructor(private val transactionsRepository: TransactionsRepository) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(
         HomeViewModelUiState(
@@ -78,6 +86,7 @@ class HomeViewModel(private val transactionsRepository: TransactionsRepository) 
     }
 
     private fun initialize() {
+        Log.d("TAG", "initialize: init")
         viewModelState.update { it.copy(isLoading = true) }
 
         viewModelScope.launch {
