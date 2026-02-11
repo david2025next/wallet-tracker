@@ -12,21 +12,11 @@ fun TransactionEntity.asExternalModel() = Transaction(
     description = description,
     createdAt = createdAt,
     transactionType = type,
-    category = Category(name = categoryName, transactionType = type),
+    category = Category.getByKey(categoryName),
     amount = amount
 )
 
-fun SummaryEntity.asExternalModel()= BalanceSummary(
+fun SummaryEntity.asExternalModel() = BalanceSummary(
     totalIncome = totalIncome,
     totalExpense = totalExpense
-)
-
-
-fun Transaction.asEntity() = TransactionEntity(
-    id = id,
-    amount = amount,
-    description = description,
-    categoryName = category.name,
-    type = transactionType,
-    createdAt = createdAt
 )
