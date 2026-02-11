@@ -42,7 +42,7 @@ private data class HomeViewModelUiState(
     val transactions: List<Transaction> = emptyList()
 ) {
 
-    fun toUiState(): HomeUiState = if (transactions.isEmpty()) {
+    fun toUiState(): HomeUiState = if (!transactions.isEmpty()) {
         HomeUiState.NoTransactions(
             isLoading = isLoading
         )

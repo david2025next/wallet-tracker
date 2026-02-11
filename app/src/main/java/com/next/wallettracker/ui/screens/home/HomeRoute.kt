@@ -68,52 +68,41 @@ fun HomeRoute(homeViewModel: HomeViewModel = hiltViewModel()) {
 
 @Composable
 fun HomeRoute(uiState: HomeUiState) {
+    if(uiState.isLoading){
+        LoadingContent()
+    } else{
+        when (uiState) {
+            is HomeUiState.HasTransactions -> HasTransactionsScreen(
+                balance = uiState.balance,
+                totalIncome = uiState.totalIncome,
+                totalExpense = uiState.totalExpense,
+                recentTransactions = uiState.transactions
+            )
 
-    Scaffold(
-        topBar = { HomeTopBar(R.string.app_name) }
-    ) { paddingValues ->
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp),
-            contentAlignment = Alignment.Center
-        ) {
-
-            if (uiState.isLoading) {
-                CircularProgressIndicator()
-            } else {
-                when (uiState) {
-                    is HomeUiState.HasTransactions -> HasTransactionsScreen(
-                        modifier = Modifier.padding(paddingValues),
-                        balance = uiState.balance,
-                        totalIncome = uiState.totalIncome,
-                        totalExpense = uiState.totalExpense,
-                        recentTransactions = uiState.transactions
-                    )
-
-                    is HomeUiState.NoTransactions -> EmptyTransactionsScreen(
-                        image = painterResource(R.drawable.empty_wallet),
-                        title = R.string.title_empty_home,
-                        description = R.string.description_empty_home,
-                        textButton = R.string.text_button_empty_home
-                    ) { }
-                }
-            }
+            is HomeUiState.NoTransactions -> EmptyTransactionsScreen(
+                image = painterResource(R.drawable.empty_wallet),
+                title = R.string.title_empty_home,
+                description = R.string.description_empty_home,
+                textButton = R.string.text_button_empty_home
+            ) { }
         }
     }
-
 }
 
 @Composable
 private fun LoadingContent(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(horizontal = 24.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator()
+    Scaffold(
+        topBar = {HomeTopBar(R.string.app_name)}
+    ) { paddingValues ->
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(horizontal = 24.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
     }
 }
 
@@ -125,32 +114,44 @@ private fun EmptyTransactionsScreen(
     @StringRes textButton: Int,
     onAddClick: () -> Unit
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    Scaffold(
+        topBar = {HomeTopBar(R.string.app_name)}
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
+            contentAlignment = Alignment.Center
+        ){
 
-        Image(
-            painter = image,
-            contentDescription = null,
-            modifier = Modifier.size(180.dp)
-        )
-        Spacer(Modifier.height(24.dp))
-        Text(
-            text = stringResource(title),
-            style = MaterialTheme.typography.headlineSmall,
-            textAlign = TextAlign.Center
-        )
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = stringResource(description),
-            style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center
-        )
-        Spacer(Modifier.height(32.dp))
-        TextButton(
-            onClick = onAddClick
-        ) {
-            Text(stringResource(textButton))
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+
+                Image(
+                    painter = image,
+                    contentDescription = null,
+                    modifier = Modifier.size(180.dp)
+                )
+                Spacer(Modifier.height(24.dp))
+                Text(
+                    text = stringResource(title),
+                    style = MaterialTheme.typography.headlineSmall,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = stringResource(description),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(Modifier.height(32.dp))
+                TextButton(
+                    onClick = onAddClick
+                ) {
+                    Text(stringResource(textButton))
+                }
+            }
         }
     }
 }
@@ -163,18 +164,25 @@ private fun HasTransactionsScreen(
     recentTransactions: List<Transaction>,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier.fillMaxSize()
-    ) {
-        BalanceCardOverview(balance, totalExpense, totalIncome)
-        Spacer(Modifier.height(16.dp))
-        Text(
-            text = "Transactions Recentes",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-        )
-        TransactionsList(transactions = recentTransactions)
+
+    Scaffold(
+        topBar = {HomeTopBar(R.string.app_name)}
+    ) { paddingValues ->
+
+        Column(
+            modifier = modifier.fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            BalanceCardOverview(balance, totalExpense, totalIncome)
+            Spacer(Modifier.height(16.dp))
+            Text(
+                text = "Transactions Recentes",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+            TransactionsList(transactions = recentTransactions)
+        }
     }
 
 }
@@ -265,7 +273,8 @@ private fun HomeTopBar(@StringRes title: Int) {
     CenterAlignedTopAppBar(
         title = {
             Text(
-                text = stringResource(title)
+                text = stringResource(title),
+                style = MaterialTheme.typography.titleLarge
             )
         }
     )
@@ -308,7 +317,7 @@ private fun BalanceCardOverview(balance: Double, totalExpense: Double, totalInco
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
 
                 Row(
@@ -321,7 +330,7 @@ private fun BalanceCardOverview(balance: Double, totalExpense: Double, totalInco
                         modifier = Modifier.size(40.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Rounded.TrendingUp,
+                            imageVector = Icons.AutoMirrored.Rounded.TrendingUp,
                             contentDescription = "Revenus",
                             tint = MaterialTheme.colorScheme.onTertiaryContainer,
                             modifier = Modifier.padding(10.dp)
