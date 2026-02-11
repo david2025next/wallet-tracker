@@ -8,6 +8,7 @@ import com.next.wallettracker.data.repository.TransactionsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -18,22 +19,16 @@ import javax.inject.Inject
 
 sealed interface HomeUiState {
     val isLoading: Boolean
-    val totalIncome : Double
-    val totalExpense : Double
-    val balance : Double
 
     data class NoTransactions(
         override val isLoading: Boolean,
-        override val totalExpense: Double,
-        override val totalIncome: Double,
-        override val balance: Double
     ) : HomeUiState
 
     data class HasTransactions(
         override val isLoading: Boolean,
-        override val totalExpense: Double,
-        override val totalIncome: Double,
-        override val balance: Double,
+        val totalExpense: Double,
+        val totalIncome: Double,
+        val balance: Double,
         val transactions: List<Transaction>
     ) : HomeUiState
 }
@@ -49,10 +44,7 @@ private data class HomeViewModelUiState(
 
     fun toUiState(): HomeUiState = if (transactions.isEmpty()) {
         HomeUiState.NoTransactions(
-            isLoading = isLoading,
-            totalExpense = totalExpense,
-            totalIncome = totalIncome,
-            balance = balance
+            isLoading = isLoading
         )
     } else HomeUiState.HasTransactions(
         transactions = transactions,

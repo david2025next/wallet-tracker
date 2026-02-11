@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Wallet Tracker</string>
+    <string name="title_empty_home">No transactions yet</string>
+    <string name="description_empty_home">Add your income and expenses to start tracking your budget</string>
+    <string name="text_button_empty_home">Add my first transaction</string>
+</resources>
