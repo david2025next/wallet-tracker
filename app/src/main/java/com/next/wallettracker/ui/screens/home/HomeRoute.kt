@@ -3,11 +3,14 @@ package com.next.wallettracker.ui.screens.home
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -15,6 +18,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Payment
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -59,27 +64,39 @@ fun HomeRoute(uiState: HomeUiState) {
         topBar = { HomeTopBar(R.string.app_name) }
     ) { paddingValues ->
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 24.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            if (uiState.isLoading) {
-                CircularProgressIndicator()
-            } else {
-                when (uiState) {
-                    is HomeUiState.HasTransactions -> TransactionsList(uiState.transactions)
-                    is HomeUiState.NoTransactions -> EmptyTransactionsScreen(
-                        image = painterResource(R.drawable.empty_wallet),
-                        title = R.string.title_empty_home,
-                        description = R.string.description_empty_home,
-                        textButton = R.string.text_button_empty_home
-                    ) { }
-                }
+        if (uiState.isLoading) {
+            LoadingContent(Modifier.padding(paddingValues))
+        } else {
+            when (uiState) {
+                is HomeUiState.HasTransactions -> HasTransactionsScreen(
+                    modifier = Modifier.padding(paddingValues),
+                    balance = uiState.balance,
+                    totalIncome = uiState.totalIncome,
+                    totalExpense = uiState.totalExpense,
+                    recentTransactions = uiState.transactions
+                )
+
+                is HomeUiState.NoTransactions -> EmptyTransactionsScreen(
+                    image = painterResource(R.drawable.empty_wallet),
+                    title = R.string.title_empty_home,
+                    description = R.string.description_empty_home,
+                    textButton = R.string.text_button_empty_home
+                ) { }
             }
         }
+    }
+
+}
+
+@Composable
+private fun LoadingContent(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
     }
 }
 
@@ -126,9 +143,12 @@ private fun HasTransactionsScreen(
     balance: Double,
     totalExpense: Double,
     totalIncome: Double,
-    recentTransactions: List<Transaction>
+    recentTransactions: List<Transaction>,
+    modifier: Modifier = Modifier
 ) {
-    Column {
+    Column(
+        modifier = modifier.fillMaxSize()
+    ) {
         BalanceCardOverview(balance, totalExpense, totalIncome)
         Spacer(Modifier.height(16.dp))
         Text(
@@ -236,38 +256,57 @@ private fun HomeTopBar(@StringRes title: Int) {
 
 @Composable
 private fun BalanceCardOverview(balance: Double, totalExpense: Double, totalIncome: Double) {
-    /*
-    ElevatedCard(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.elevatedCardElevation(6.dp)
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
     ) {
         Column(
-            modifier = Modifier.padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.padding(16.dp)
         ) {
             Text(
-                text = stringResource(R.string.totalbalance),
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                text = "Solde",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
             )
-
             Spacer(Modifier.height(8.dp))
-
             Text(
-                text = "${balance.toCurrency()} FCFA",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
+                text = "$balance",
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
             )
-
             Spacer(Modifier.height(16.dp))
-
-            LinearProgressIndicator(
-                progress = { percent },
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                color = if (percent > 0.5f) MaterialTheme.colorScheme.error else ProgressIndicatorDefaults.linearTrackColor,
-                strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
-            )
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column {
+                    Text(
+                        text = "Revenu",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    Text(
+                        text = "$totalIncome",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+                Column {
+                    Text(
+                        text = "Depense",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    Text(
+                        text = "$totalExpense",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
         }
     }
-     */
 }
