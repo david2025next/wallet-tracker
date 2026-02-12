@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.ArrowOutward
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.SouthEast
 import androidx.compose.material.icons.rounded.TrendingDown
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -39,11 +40,17 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -60,6 +67,7 @@ import com.next.wallettracker.R
 import com.next.wallettracker.data.models.Category
 import com.next.wallettracker.data.models.Transaction
 import com.next.wallettracker.data.models.TransactionType
+import com.next.wallettracker.ui.components.itemsBottomNavigation
 import com.next.wallettracker.ui.theme.WallettrackerTheme
 import com.next.wallettracker.ui.utils.toCurrency
 import com.next.wallettracker.ui.utils.toDisplayDate
@@ -71,10 +79,13 @@ fun HasTransactionsScreen(
     totalIncome: Double,
     recentTransactions: List<Transaction>,
     modifier: Modifier = Modifier,
-    addClick : ()->Unit
+    addClick: () -> Unit
 ) {
     Scaffold(
-        topBar = {HomeTopBar(R.string.app_name)},
+        bottomBar = {
+            WalletBottomNavigation()
+        },
+        topBar = { HomeTopBar(R.string.app_name) },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = addClick,
@@ -89,6 +100,31 @@ fun HasTransactionsScreen(
     ) { paddingValues ->
 
         Dashboard(modifier, paddingValues, balance, totalExpense, totalIncome, recentTransactions)
+    }
+}
+
+@Composable
+private fun WalletBottomNavigation() {
+
+    var selectedItemIndex by remember { mutableStateOf(0) }
+    NavigationBar(
+        containerColor = MaterialTheme.colorScheme.background
+    ) {
+        itemsBottomNavigation.forEachIndexed { index, item ->
+            NavigationBarItem(
+                selected = selectedItemIndex == index,
+                onClick = {
+                    selectedItemIndex = index
+                },
+                icon = {
+                    Icon(
+                        imageVector = if(selectedItemIndex==index) item.selectedIcon else item.unselectedIcon,
+                        contentDescription = stringResource(item.title)
+                    )
+                },
+                label = {Text(text = stringResource(item.title))}
+            )
+        }
     }
 }
 
@@ -148,14 +184,14 @@ fun EmptyTransactionsScreen(
     onAddClick: () -> Unit
 ) {
     Scaffold(
-        topBar = {HomeTopBar(R.string.app_name)}
+        topBar = { HomeTopBar(R.string.app_name) }
     ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
             contentAlignment = Alignment.Center
-        ){
+        ) {
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -188,10 +224,11 @@ fun EmptyTransactionsScreen(
         }
     }
 }
+
 @Composable
 fun LoadingContent(modifier: Modifier = Modifier) {
     Scaffold(
-        topBar = {HomeTopBar(R.string.app_name)}
+        topBar = { HomeTopBar(R.string.app_name) }
     ) { paddingValues ->
         Box(
             modifier = modifier
@@ -209,9 +246,9 @@ fun LoadingContent(modifier: Modifier = Modifier) {
 private fun TransactionsList(transactions: List<Transaction>) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(8.dp)
+        contentPadding = PaddingValues(horizontal = 8.dp)
     ) {
-        items(transactions){ transaction ->
+        items(transactions) { transaction ->
             TransactionItem(transaction)
         }
     }
@@ -313,7 +350,7 @@ private fun BalanceCardOverview(balance: Double, totalExpense: Double, totalInco
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text ="${balance.toCurrency()} FCFA",
+                text = "${balance.toCurrency()} FCFA",
                 style = MaterialTheme.typography.headlineMedium.copy(
                     fontWeight = FontWeight.Bold
                 ),
@@ -390,7 +427,7 @@ private fun BalanceCardOverview(balance: Double, totalExpense: Double, totalInco
                             horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             Text(
-                                text =" ${totalExpense.toCurrency()}",
+                                text = " ${totalExpense.toCurrency()}",
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onErrorContainer
@@ -410,7 +447,7 @@ private fun BalanceCardOverview(balance: Double, totalExpense: Double, totalInco
                         }
                     }
                 }
-            
+
 //                Row(
 //                    verticalAlignment = Alignment.CenterVertically,
 //                    horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -509,7 +546,7 @@ private fun CustomIcon(
 
 @Preview
 @Composable
-private fun TransactionItemPreview(){
+private fun TransactionItemPreview() {
 
     val transaction = Transaction(
         id = 1,
@@ -526,7 +563,7 @@ private fun TransactionItemPreview(){
 
 @Preview
 @Composable
-private fun HasTransactionsScreenPreview(){
+private fun HasTransactionsScreenPreview() {
     val transactions = listOf(
 
         Transaction(
@@ -581,9 +618,9 @@ private fun HasTransactionsScreenPreview(){
                 balance = 120000000.0,
                 totalExpense = 2500000.0,
                 totalIncome = 4500000.0,
-                recentTransactions =transactions,
+                recentTransactions = transactions,
                 modifier = Modifier.padding(paddingValues)
-            ){}
+            ) {}
         }
     }
 }
