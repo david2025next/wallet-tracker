@@ -8,4 +8,5 @@
     <string name="transactions_recentes">Recent Transactions</string>
     <string name="revenu">Income</string>
     <string name="depense">Expense</string>
+    <string name="voir_tout">View All</string>
 </resources>

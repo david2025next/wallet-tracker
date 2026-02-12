@@ -22,8 +22,8 @@ fun HomeRoute(uiState: HomeUiState) {
         when (uiState) {
             is HomeUiState.HasTransactions -> HasTransactionsScreen(
                 balance = uiState.balance,
-                totalIncome = uiState.totalIncome,
-                totalExpense = uiState.totalExpense,
+                totalIncome = uiState.totalIncomeMonthly,
+                totalExpense = uiState.totalExpenseMonthly,
                 recentTransactions = uiState.transactions
             ){}
 

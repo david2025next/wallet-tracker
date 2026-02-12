@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.next.wallettracker.data.models.Transaction
 import com.next.wallettracker.data.repository.TransactionsRepository
+import com.next.wallettracker.ui.utils.monthRange
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -26,8 +27,8 @@ sealed interface HomeUiState {
 
     data class HasTransactions(
         override val isLoading: Boolean,
-        val totalExpense: Double,
-        val totalIncome: Double,
+        val totalExpenseMonthly: Double,
+        val totalIncomeMonthly: Double,
         val balance: Double,
         val transactions: List<Transaction>
     ) : HomeUiState
@@ -35,29 +36,30 @@ sealed interface HomeUiState {
 
 
 private data class HomeViewModelUiState(
-    val totalIncome: Double = 0.0,
-    val totalExpense: Double = 0.0,
+    val totalIncomeMonthly: Double = 0.0,
+    val totalExpenseMonthly: Double = 0.0,
     val balance: Double = 0.0,
     val isLoading: Boolean = false,
     val transactions: List<Transaction> = emptyList()
 ) {
 
-    fun toUiState(): HomeUiState = if (!transactions.isEmpty()) {
+    fun toUiState(): HomeUiState = if (transactions.isEmpty()) {
         HomeUiState.NoTransactions(
             isLoading = isLoading
         )
     } else HomeUiState.HasTransactions(
         transactions = transactions,
         isLoading = isLoading,
-        totalExpense = totalExpense,
-        totalIncome = totalIncome,
+        totalExpenseMonthly = totalExpenseMonthly,
+        totalIncomeMonthly = totalIncomeMonthly,
         balance = balance
     )
 }
 
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(private val transactionsRepository: TransactionsRepository) : ViewModel() {
+class HomeViewModel @Inject constructor(private val transactionsRepository: TransactionsRepository) :
+    ViewModel() {
 
     private val viewModelState = MutableStateFlow(
         HomeViewModelUiState(
@@ -82,18 +84,22 @@ class HomeViewModel @Inject constructor(private val transactionsRepository: Tran
         viewModelState.update { it.copy(isLoading = true) }
 
         viewModelScope.launch {
-            transactionsRepository
-                .getBalanceSummaryStream()
-                .combine(transactionsRepository.getRecentTransactionsStream()) { balanceSummary, recentTransactions ->
-                    viewModelState.update {
-                        it.copy(
-                            totalIncome = balanceSummary.totalIncome,
-                            totalExpense = balanceSummary.totalExpense,
-                            transactions = recentTransactions,
-                            isLoading = false
-                        )
-                    }
-                }.collect()
+            combine(
+                transactionsRepository.getBalance(),
+                transactionsRepository.getRecentTransactionsStream(),
+                transactionsRepository.getTotalsSpentByPeriod(monthRange().start, monthRange().end)
+            ) { balance, recentsTransactions, totalsSpent ->
+
+                viewModelState.update {
+                    it.copy(
+                        totalIncomeMonthly = totalsSpent.totalsIncome,
+                        totalExpenseMonthly = totalsSpent.totalsExpense,
+                        balance = balance,
+                        transactions = recentsTransactions,
+                        isLoading = false
+                    )
+                }
+            }.collect()
         }
     }
 }

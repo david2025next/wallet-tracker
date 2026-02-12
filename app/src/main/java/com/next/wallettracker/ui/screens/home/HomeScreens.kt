@@ -15,14 +15,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.automirrored.rounded.TrendingDown
 import androidx.compose.material.icons.automirrored.rounded.TrendingUp
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowForwardIos
+import androidx.compose.material.icons.filled.ArrowOutward
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.SouthEast
 import androidx.compose.material.icons.rounded.TrendingDown
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -82,21 +88,54 @@ fun HasTransactionsScreen(
         }
     ) { paddingValues ->
 
-        Column(
-            modifier = modifier
-                .padding(paddingValues)
-                .fillMaxSize()
+        Dashboard(modifier, paddingValues, balance, totalExpense, totalIncome, recentTransactions)
+    }
+}
+
+@Composable
+private fun Dashboard(
+    modifier: Modifier,
+    paddingValues: PaddingValues,
+    balance: Double,
+    totalExpense: Double,
+    totalIncome: Double,
+    recentTransactions: List<Transaction>
+) {
+    Column(
+        modifier = modifier
+            .padding(paddingValues)
+            .fillMaxSize()
+    ) {
+        BalanceCardOverview(balance, totalExpense, totalIncome)
+        Spacer(Modifier.height(16.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            BalanceCardOverview(balance, totalExpense, totalIncome)
-            Spacer(Modifier.height(16.dp))
             Text(
                 text = stringResource(R.string.transactions_recentes),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
-            TransactionsList(transactions = recentTransactions)
+
+            TextButton(
+                onClick = {}
+            ) {
+                Text(
+                    text = stringResource(R.string.voir_tout),
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(Modifier.width(4.dp))
+                Icon(
+                    imageVector = Icons.Filled.ChevronRight,
+                    contentDescription = null
+                )
+            }
         }
+        TransactionsList(transactions = recentTransactions)
     }
 }
 
@@ -170,7 +209,7 @@ fun LoadingContent(modifier: Modifier = Modifier) {
 private fun TransactionsList(transactions: List<Transaction>) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(16.dp)
+        contentPadding = PaddingValues(8.dp)
     ) {
         items(transactions){ transaction ->
             TransactionItem(transaction)
@@ -182,7 +221,8 @@ private fun TransactionsList(transactions: List<Transaction>) {
 @Composable
 private fun TransactionItem(transaction: Transaction) {
     ListItem(
-        modifier = Modifier.clip(RoundedCornerShape(16.dp))
+        modifier = Modifier
+            .clip(RoundedCornerShape(16.dp))
             .clickable(
                 enabled = true,
                 onClick = {}
@@ -283,73 +323,157 @@ private fun BalanceCardOverview(balance: Double, totalExpense: Double, totalInco
             Spacer(Modifier.height(20.dp))
 
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                Card(
+                    modifier = Modifier.weight(1f),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    )
                 ) {
-                    Surface(
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.tertiaryContainer,
-                        modifier = Modifier.size(40.dp)
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.TrendingUp,
-                            contentDescription = stringResource(R.string.revenu),
-                            tint = MaterialTheme.colorScheme.onTertiaryContainer,
-                            modifier = Modifier.padding(10.dp)
-                        )
-                    }
-                    Column {
                         Text(
-                            text = stringResource(R.string.revenu),
-                            style = MaterialTheme.typography.bodySmall,
+                            text = " Revenu du mois",
+                            style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                         )
-                        Text(
-                            text =totalIncome.toCurrency(),
-                            style = MaterialTheme.typography.titleSmall.copy(
-                                fontWeight = FontWeight.SemiBold
-                            ),
-                            color = MaterialTheme.colorScheme.tertiary
-                        )
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(
+                                text = totalIncome.toCurrency(),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                            Icon(
+                                imageVector = Icons.Filled.ArrowOutward,
+                                contentDescription = null,
+                                tint = Color(0xff2e7d32),
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text(
+                                text = "5.2%",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = Color(0xff2e7d32),
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
                     }
                 }
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                Card(
+                    modifier = Modifier.weight(1f),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    ),
                 ) {
-                    Surface(
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.errorContainer,
-                        modifier = Modifier.size(40.dp)
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.TrendingDown,
-                            contentDescription = "Dépenses",
-                            tint = MaterialTheme.colorScheme.onErrorContainer,
-                            modifier = Modifier.padding(10.dp)
-                        )
-                    }
-                    Column {
                         Text(
-                            text = stringResource(R.string.depense),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                            text = " Dépense du mois",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.7f)
                         )
-                        Text(
-                            text = totalExpense.toCurrency(),
-                            style = MaterialTheme.typography.titleSmall.copy(
-                                fontWeight = FontWeight.SemiBold
-                            ),
-                            color = MaterialTheme.colorScheme.error
-                        )
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(
+                                text =" ${totalExpense.toCurrency()}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                            Icon(
+                                imageVector = Icons.Filled.SouthEast,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text(
+                                text = "2.6%",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.error,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
                     }
                 }
+            
+//                Row(
+//                    verticalAlignment = Alignment.CenterVertically,
+//                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+//                ) {
+//                    Surface(
+//                        shape = CircleShape,
+//                        color = MaterialTheme.colorScheme.tertiaryContainer,
+//                        modifier = Modifier.size(40.dp)
+//                    ) {
+//                        Icon(
+//                            imageVector = Icons.AutoMirrored.Rounded.TrendingUp,
+//                            contentDescription = stringResource(R.string.revenu),
+//                            tint = MaterialTheme.colorScheme.onTertiaryContainer,
+//                            modifier = Modifier.padding(10.dp)
+//                        )
+//                    }
+//                    Column {
+//                        Text(
+//                            text = stringResource(R.string.revenu),
+//                            style = MaterialTheme.typography.bodySmall,
+//                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+//                        )
+//                        Text(
+//                            text =totalIncome.toCurrency(),
+//                            style = MaterialTheme.typography.titleSmall.copy(
+//                                fontWeight = FontWeight.SemiBold
+//                            ),
+//                            color = MaterialTheme.colorScheme.tertiary
+//                        )
+//                    }
+//                }
+
+//                Row(
+//                    verticalAlignment = Alignment.CenterVertically,
+//                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+//                ) {
+//                    Surface(
+//                        shape = CircleShape,
+//                        color = MaterialTheme.colorScheme.errorContainer,
+//                        modifier = Modifier.size(40.dp)
+//                    ) {
+//                        Icon(
+//                            imageVector = Icons.AutoMirrored.Rounded.TrendingDown,
+//                            contentDescription = "Dépenses",
+//                            tint = MaterialTheme.colorScheme.onErrorContainer,
+//                            modifier = Modifier.padding(10.dp)
+//                        )
+//                    }
+//                    Column {
+//                        Text(
+//                            text = stringResource(R.string.depense),
+//                            style = MaterialTheme.typography.bodySmall,
+//                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+//                        )
+//                        Text(
+//                            text = totalExpense.toCurrency(),
+//                            style = MaterialTheme.typography.titleSmall.copy(
+//                                fontWeight = FontWeight.SemiBold
+//                            ),
+//                            color = MaterialTheme.colorScheme.error
+//                        )
+//                    }
+//                }
             }
         }
     }
@@ -454,9 +578,9 @@ private fun HasTransactionsScreenPreview(){
     WallettrackerTheme {
         Scaffold { paddingValues ->
             HasTransactionsScreen(
-                balance = 12000.0,
-                totalExpense = 25000.0,
-                totalIncome = 45000.0,
+                balance = 120000000.0,
+                totalExpense = 2500000.0,
+                totalIncome = 4500000.0,
                 recentTransactions =transactions,
                 modifier = Modifier.padding(paddingValues)
             ){}
