@@ -54,6 +54,8 @@ import com.next.wallettracker.R
 import com.next.wallettracker.data.models.Category
 import com.next.wallettracker.data.models.Transaction
 import com.next.wallettracker.data.models.TransactionType
+import com.next.wallettracker.ui.WalletTrackerDestination
+import com.next.wallettracker.ui.WalletTrackerNavigationUtils
 import com.next.wallettracker.ui.components.WalletBottomNavigation
 import com.next.wallettracker.ui.theme.WallettrackerTheme
 import com.next.wallettracker.ui.utils.humanReadableDateMonth
@@ -121,7 +123,7 @@ private fun Dashboard(
             )
 
             TextButton(
-                onClick = {}
+                onClick = { WalletTrackerNavigationUtils.navigate(WalletTrackerDestination.TRANSACTIONS)}
             ) {
                 Text(
                     text = stringResource(R.string.voir_tout),

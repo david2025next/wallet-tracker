@@ -43,6 +43,7 @@ android {
 
 dependencies {
 
+    implementation("io.github.vanpra.compose-material-dialogs:datetime:0.8.1-rc")
     implementation(libs.androidx.navigation.compose)
     implementation("androidx.compose.material:material-icons-extended")
     implementation(libs.androidx.hilt.navigation.compose)

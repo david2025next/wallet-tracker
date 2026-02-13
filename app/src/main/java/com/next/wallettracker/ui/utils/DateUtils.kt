@@ -24,17 +24,20 @@ fun Long.humanReadableDateMonth(
     }
 }
 
-
-fun Long.toHumanDate(
+fun LocalDate.toHumanDate(
     locale: Locale = Locale.FRENCH,
     zoneId: ZoneId = ZoneId.systemDefault()
-): String {
+) : String = DateTimeFormatter.ofPattern("d MMM yyyy", locale).format(this)
+
+fun Long.toDate(
+    locale: Locale = Locale.FRENCH,
+    zoneId: ZoneId = ZoneId.systemDefault()
+): LocalDate {
     val date = Instant.ofEpochMilli(this)
         .atZone(zoneId)
         .toLocalDate()
 
-    return DateTimeFormatter.ofPattern("d MMM yyyy", locale).format(date)
-
+    return date
 }
 
 fun LocalDate.toMillis(zoneId: ZoneId = ZoneId.systemDefault()): Long {

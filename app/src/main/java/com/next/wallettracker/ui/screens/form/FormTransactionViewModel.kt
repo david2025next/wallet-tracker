@@ -10,6 +10,7 @@ import com.next.wallettracker.data.repository.TransactionsRepository
 import com.next.wallettracker.domain.use_cases.ValidationAmountUseCase
 import com.next.wallettracker.domain.use_cases.ValidationDescriptionUseCase
 import com.next.wallettracker.ui.utils.toCurrency
+import com.next.wallettracker.ui.utils.toDate
 import com.next.wallettracker.ui.utils.toMillis
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +18,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.LocalDateTime
 import javax.inject.Inject
 
 
@@ -44,7 +44,7 @@ class FormTransactionViewModel @Inject constructor(
                                 id = transaction.id,
                                 description = it.description,
                                 amount = it.amount.toCurrency(),
-                                date = it.createdAt,
+                                date = it.createdAt.toDate(),
                                 category = it.category,
                                 transactionType = it.transactionType,
                                 isLoading = false
@@ -123,7 +123,7 @@ sealed class FormEvent {
 
     data class DescriptionChanged(val description: String) : FormEvent()
     data class AmountChanged(val amount: String) : FormEvent()
-    data class DateChanged(val date: Long) : FormEvent()
+    data class DateChanged(val date: LocalDate) : FormEvent()
     data class CategoryChanged(val name: String) : FormEvent()
     data class TransactionTypeChanged(val type: TransactionType) : FormEvent()
     data object Submit : FormEvent()
@@ -133,7 +133,7 @@ data class FormUiState(
     val id: Long = 0,
     val description: String = "",
     val amount: String = "500.0",
-    val date: Long = LocalDate.now().toMillis(),
+    val date: LocalDate = LocalDate.now(),
     val category: Category = Category.BUSINESS,
     val categoriesForTransactionType: List<Category> = getCategoriesForTransactionType(
         TransactionType.INCOME
@@ -148,7 +148,7 @@ data class FormUiState(
         id = id,
         description = description,
         amount = amount.toDouble(),
-        createdAt = date,
+        createdAt = date.toMillis(),
         category = category,
         transactionType = transactionType
     )

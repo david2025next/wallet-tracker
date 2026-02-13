@@ -8,6 +8,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
@@ -88,6 +89,10 @@ import com.next.wallettracker.ui.WalletTrackerNavigationUtils
 import com.next.wallettracker.ui.utils.formatToCurrency
 import com.next.wallettracker.ui.utils.toCurrency
 import com.next.wallettracker.ui.utils.toHumanDate
+import com.vanpra.composematerialdialogs.MaterialDialog
+import com.vanpra.composematerialdialogs.datetime.date.datepicker
+import com.vanpra.composematerialdialogs.rememberMaterialDialogState
+import java.time.LocalDate
 
 
 @Composable
@@ -100,7 +105,8 @@ fun FormTransactionRoute(
     uiState.message?.let { text ->
         LaunchedEffect(Unit) {
             snackBarHostState.showSnackbar(
-                message = text
+                message = text,
+                actionLabel = "OK"
             )
             formTransactionViewModel.reset()
         }
@@ -109,7 +115,7 @@ fun FormTransactionRoute(
         snackBarHostState = snackBarHostState,
         uiState = uiState,
         onFormEvent = formTransactionViewModel::uiEvent,
-        onNavigationBack = { WalletTrackerNavigationUtils.navigate(WalletTrackerDestination.HOME)}
+        onNavigationBack = { WalletTrackerNavigationUtils.navigate(WalletTrackerDestination.HOME) }
     )
 }
 
@@ -199,13 +205,13 @@ private fun FormTransactionRoute(
 
 
                 EnhancedCategoryField(
-                    selectedCategory = uiState.category.name,
+                    selectedCategory = uiState.category.key,
                     categories = uiState.categoriesForTransactionType,
                     onCategoryChanged = { onFormEvent(FormEvent.CategoryChanged(it)) }
                 )
 
                 EnhancedDateField(
-                    date = uiState.date,
+                    selectedDate = uiState.date,
                     onSelectedDate = { onFormEvent(FormEvent.DateChanged(it)) }
                 )
             }
@@ -273,8 +279,10 @@ private fun TransactionTypeSelector(
                     targetValue = when {
                         isSelected && transaction == TransactionType.INCOME ->
                             MaterialTheme.colorScheme.primaryContainer
+
                         isSelected && transaction == TransactionType.EXPENSE ->
                             MaterialTheme.colorScheme.errorContainer
+
                         else -> Color.Transparent
                     },
                     animationSpec = tween(300),
@@ -285,8 +293,10 @@ private fun TransactionTypeSelector(
                     targetValue = when {
                         isSelected && transaction == TransactionType.INCOME ->
                             MaterialTheme.colorScheme.onPrimaryContainer
+
                         isSelected && transaction == TransactionType.EXPENSE ->
                             MaterialTheme.colorScheme.onErrorContainer
+
                         else -> MaterialTheme.colorScheme.onSurfaceVariant
                     },
                     label = "textAnim"
@@ -562,7 +572,7 @@ private fun EnhancedCategoryField(
                     fontWeight = FontWeight.Medium
                 ),
                 leadingIcon = {
-                    categories.find { it.name == selectedCategory }?.let { category ->
+                    categories.find { it.key == selectedCategory }?.let { category ->
                         Icon(
                             imageVector = category.icon,
                             contentDescription = null,
@@ -572,8 +582,10 @@ private fun EnhancedCategoryField(
                     }
                 },
                 trailingIcon = {
-                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded,
-                        modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryEditable))
+                    ExposedDropdownMenuDefaults.TrailingIcon(
+                        expanded = expanded,
+                        modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryEditable)
+                    )
                 },
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
@@ -606,7 +618,7 @@ private fun EnhancedCategoryField(
                             Icon(
                                 imageVector = category.icon,
                                 contentDescription = null,
-                                tint = if (category.name == selectedCategory)
+                                tint = if (category.key == selectedCategory)
                                     MaterialTheme.colorScheme.primary
                                 else
                                     MaterialTheme.colorScheme.onSurfaceVariant,
@@ -634,14 +646,16 @@ private fun EnhancedCategoryField(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EnhancedDateField(
-    date: Long,
-    onSelectedDate: (Long) -> Unit
+    selectedDate: LocalDate,
+    onSelectedDate: (LocalDate) -> Unit
 ) {
-    var showModal by remember { mutableStateOf(false) }
-    val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = date
-    )
 
+    val dateDialogState = rememberMaterialDialogState()
+//    var showModal by remember { mutableStateOf(false) }
+//    val datePickerState = rememberDatePickerState(
+//        initialSelectedDateMillis = date
+//    )
+//
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = "Date",
@@ -653,7 +667,7 @@ private fun EnhancedDateField(
         )
 
         OutlinedTextField(
-            value = date.toHumanDate(),
+            value = selectedDate.toHumanDate(),
             onValueChange = {},
             readOnly = true,
             textStyle = MaterialTheme.typography.bodyMedium.copy(
@@ -661,12 +675,12 @@ private fun EnhancedDateField(
             ),
             modifier = Modifier
                 .fillMaxWidth()
-                .pointerInput(date) {
+                .pointerInput(selectedDate) {
                     awaitEachGesture {
                         awaitFirstDown(pass = PointerEventPass.Initial)
                         val upEvent = waitForUpOrCancellation(pass = PointerEventPass.Initial)
                         if (upEvent != null) {
-                            showModal = true
+                            dateDialogState.show()
                         }
                     }
                 },
@@ -696,50 +710,68 @@ private fun EnhancedDateField(
         )
     }
 
-    if (showModal) {
-        DatePickerDialog(
-            onDismissRequest = { showModal = false },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        datePickerState.selectedDateMillis?.let {
-                            onSelectedDate(it)
-                        }
-                        showModal = false
-                    }
-                ) {
-                    Text(
-                        "Confirmer",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    )
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showModal = false }) {
-                    Text(
-                        "Annuler",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.Medium
-                        )
-                    )
-                }
-            },
-            shape = RoundedCornerShape(24.dp),
-            colors = DatePickerDefaults.colors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-            )
+    MaterialDialog(
+        dialogState = dateDialogState ,
+        buttons = {
+            positiveButton(text = "OK")
+            negativeButton(text = "Annuler")
+        }
+    ) {
+        datepicker(
+            initialDate = selectedDate,
+            title = "Selectionnez une date",
+            allowedDateValidator = {
+                it <= LocalDate.now()
+            }
         ) {
-            DatePicker(
-                state = datePickerState,
-                colors = DatePickerDefaults.colors(
-                    selectedDayContainerColor = MaterialTheme.colorScheme.primary,
-                    todayDateBorderColor = MaterialTheme.colorScheme.primary
-                )
-            )
+            onSelectedDate(it)
         }
     }
+
+//    if (showModal) {
+//        DatePickerDialog(
+//            onDismissRequest = { showModal = false },
+//            confirmButton = {
+//                TextButton(
+//                    onClick = {
+//                        datePickerState.selectedDateMillis?.let {
+//                            onSelectedDate(it)
+//                        }
+//                        showModal = false
+//                    }
+//                ) {
+//                    Text(
+//                        "Confirmer",
+//                        style = MaterialTheme.typography.labelSmall.copy(
+//                            fontWeight = FontWeight.SemiBold
+//                        )
+//                    )
+//                }
+//            },
+//            dismissButton = {
+//                TextButton(onClick = { showModal = false }) {
+//                    Text(
+//                        "Annuler",
+//                        style = MaterialTheme.typography.labelSmall.copy(
+//                            fontWeight = FontWeight.Medium
+//                        )
+//                    )
+//                }
+//            },
+//            shape = RoundedCornerShape(24.dp),
+//            colors = DatePickerDefaults.colors(
+//                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+//            )
+//        ) {
+//            DatePicker(
+//                state = datePickerState,
+//                colors = DatePickerDefaults.colors(
+//                    selectedDayContainerColor = MaterialTheme.colorScheme.primary,
+//                    todayDateBorderColor = MaterialTheme.colorScheme.primary
+//                )
+//            )
+//        }
+//    }
 }
 
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
