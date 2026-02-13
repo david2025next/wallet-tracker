@@ -6,6 +6,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.next.wallettracker.R
+import com.next.wallettracker.ui.WalletTrackerDestination
+import com.next.wallettracker.ui.WalletTrackerNavigationUtils
 
 @Composable
 fun HomeRoute(homeViewModel: HomeViewModel = hiltViewModel()) {
@@ -25,14 +27,14 @@ fun HomeRoute(uiState: HomeUiState) {
                 totalIncome = uiState.totalIncomeMonthly,
                 totalExpense = uiState.totalExpenseMonthly,
                 recentTransactions = uiState.transactions
-            ){}
+            ){WalletTrackerNavigationUtils.navigate(WalletTrackerDestination.FORM) }
 
             is HomeUiState.NoTransactions -> EmptyTransactionsScreen(
                 image = painterResource(R.drawable.empty_wallet),
                 title = R.string.title_empty_home,
                 description = R.string.description_empty_home,
                 textButton = R.string.text_button_empty_home
-            ) { }
+            ) { WalletTrackerNavigationUtils.navigate(WalletTrackerDestination.FORM) }
         }
     }
 }

@@ -32,4 +32,14 @@ class WalletTrackerNavigationActions(navController: NavHostController) {
             launchSingleTop = true
         }
     }
+
+    val navigateToForm : ()-> Unit = {
+        navController.navigate(WalletTrackerDestination.FORM.route){
+            popUpTo(navController.graph.findStartDestination().id){
+                saveState = true
+            }
+            restoreState = true
+            launchSingleTop = true
+        }
+    }
 }

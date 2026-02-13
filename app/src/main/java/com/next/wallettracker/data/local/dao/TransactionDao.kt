@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 interface TransactionDao {
 
     @Upsert
-    fun upsert(transactionEntity: TransactionEntity)
+    suspend fun upsert(transactionEntity: TransactionEntity)
 
     @Query("""
         SELECT 

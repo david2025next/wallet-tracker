@@ -9,3 +9,9 @@ fun Double.toCurrency() : String{
         .format(this)
     return format
 }
+
+fun String.formatToCurrency() : String {
+    return NumberFormat
+        .getInstance()
+        .format(this.toDoubleOrNull() ?: 0.0)
+}

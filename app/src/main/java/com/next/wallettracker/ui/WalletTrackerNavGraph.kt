@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.next.wallettracker.ui.screens.analytics.AnalyticsRoute
+import com.next.wallettracker.ui.screens.form.FormTransactionRoute
 import com.next.wallettracker.ui.screens.home.HomeRoute
 import com.next.wallettracker.ui.screens.transactions.TransactionsRoute
 
@@ -38,6 +39,12 @@ fun WalletTrackerNavGraph(
             route = WalletTrackerDestination.ANALYSIS.route
         ){
             AnalyticsRoute()
+        }
+
+        composable(
+            route = WalletTrackerDestination.FORM.route
+        ){
+            FormTransactionRoute()
         }
 
     }

@@ -2,6 +2,7 @@ package com.next.wallettracker.data.local
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import com.next.wallettracker.data.local.dao.CategoryDao
 import com.next.wallettracker.data.local.dao.TransactionDao
 import com.next.wallettracker.data.local.entities.CategoryEntity
 import com.next.wallettracker.data.local.entities.TransactionEntity
@@ -13,4 +14,5 @@ import com.next.wallettracker.data.local.entities.TransactionEntity
 abstract class WalletAppDataBase : RoomDatabase() {
 
     abstract val transactionDao : TransactionDao
+    abstract val categoryDao : CategoryDao
 }

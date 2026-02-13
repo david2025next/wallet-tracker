@@ -1,4 +1,4 @@
-package com.next.wallettracker.ui.screens.transactionForm
+package com.next.wallettracker.ui.screens.form
 
 import android.content.res.Configuration
 import androidx.compose.animation.animateColorAsState
@@ -36,21 +36,20 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -63,6 +62,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -79,24 +79,37 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.next.wallettracker.data.models.Category
 import com.next.wallettracker.data.models.TransactionType
+import com.next.wallettracker.ui.WalletTrackerDestination
+import com.next.wallettracker.ui.WalletTrackerNavigationUtils
+import com.next.wallettracker.ui.utils.formatToCurrency
 import com.next.wallettracker.ui.utils.toCurrency
 import com.next.wallettracker.ui.utils.toHumanDate
 
 
 @Composable
 fun FormTransactionRoute(
-    formTransactionViewModel: FormTransactionViewModel
+    formTransactionViewModel: FormTransactionViewModel = hiltViewModel()
 ) {
     val uiState by formTransactionViewModel.formUiState.collectAsStateWithLifecycle()
     val snackBarHostState = remember { SnackbarHostState() }
+
+    uiState.message?.let { text ->
+        LaunchedEffect(Unit) {
+            snackBarHostState.showSnackbar(
+                message = text
+            )
+            formTransactionViewModel.reset()
+        }
+    }
     FormTransactionRoute(
         snackBarHostState = snackBarHostState,
         uiState = uiState,
         onFormEvent = formTransactionViewModel::uiEvent,
-        onNavigationBack = {}
+        onNavigationBack = { WalletTrackerNavigationUtils.navigate(WalletTrackerDestination.HOME)}
     )
 }
 
@@ -118,7 +131,7 @@ private fun FormTransactionRoute(
                 title = {
                     Text(
                         text = if (uiState.id == 0L) "Nouvelle transaction" else "Modifier transaction",
-                        style = MaterialTheme.typography.titleLarge.copy(
+                        style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.SemiBold
                         )
                     )
@@ -151,7 +164,7 @@ private fun FormTransactionRoute(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(28.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
             TransactionTypeSelector(
@@ -167,11 +180,11 @@ private fun FormTransactionRoute(
 
                 AmountInputField(
                     label = "Montant",
-                    fieldValue = uiState.amount.toCurrency(),
+                    fieldValue = uiState.amount.formatToCurrency(),
                     error = uiState.errorAmount,
                     transactionType = uiState.transactionType,
-                    placeholder = "0.00",
-                    onfieldInputChanged = { onFormEvent(FormEvent.AmountChanged(it.toDouble())) }
+                    placeholder = "500".formatToCurrency(),
+                    onfieldInputChanged = { onFormEvent(FormEvent.AmountChanged(it)) }
                 )
 
 
@@ -533,7 +546,7 @@ private fun EnhancedCategoryField(
                 fontWeight = FontWeight.SemiBold
             ),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = 12.dp)
+            modifier = Modifier.padding(bottom = 4.dp)
         )
 
         ExposedDropdownMenuBox(
@@ -559,12 +572,8 @@ private fun EnhancedCategoryField(
                     }
                 },
                 trailingIcon = {
-                    Icon(
-                        imageVector = if (expanded) Icons.Default.KeyboardArrowUp
-                        else Icons.Default.KeyboardArrowDown,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded,
+                        modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryEditable))
                 },
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
@@ -574,7 +583,6 @@ private fun EnhancedCategoryField(
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .menuAnchor()
             )
 
             ExposedDropdownMenu(
@@ -606,7 +614,7 @@ private fun EnhancedCategoryField(
                             )
                         },
                         onClick = {
-                            onCategoryChanged(category.name)
+                            onCategoryChanged(category.key)
                             expanded = false
                         },
                         colors = MenuDefaults.itemColors(
@@ -615,7 +623,7 @@ private fun EnhancedCategoryField(
                             else
                                 MaterialTheme.colorScheme.onSurface
                         ),
-                        modifier = Modifier.padding(horizontal = 4.dp)
+                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
                     )
                 }
             }
@@ -641,7 +649,7 @@ private fun EnhancedDateField(
                 fontWeight = FontWeight.SemiBold
             ),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = 12.dp)
+            modifier = Modifier.padding(bottom = 4.dp)
         )
 
         OutlinedTextField(
@@ -743,7 +751,7 @@ private fun AddTransactionScreenPreview() {
             snackBarHostState = snackBarHostState,
             uiState = FormUiState(
                 transactionType = TransactionType.INCOME,
-                amount = 25000.0,
+                amount = "25000.0",
                 description = "Salaire mensuel"
             ),
             onFormEvent = {},
@@ -761,7 +769,7 @@ private fun AddTransactionScreenPreviewDark() {
             snackBarHostState = snackBarHostState,
             uiState = FormUiState(
                 transactionType = TransactionType.EXPENSE,
-                amount = 0.0,
+                amount = "0.0",
                 description = ""
             ),
             onFormEvent = {},

@@ -1,4 +1,4 @@
-package com.next.wallettracker.ui.screens.transactionForm
+package com.next.wallettracker.ui.screens.form
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -9,6 +9,7 @@ import com.next.wallettracker.data.models.TransactionType
 import com.next.wallettracker.data.repository.TransactionsRepository
 import com.next.wallettracker.domain.use_cases.ValidationAmountUseCase
 import com.next.wallettracker.domain.use_cases.ValidationDescriptionUseCase
+import com.next.wallettracker.ui.utils.toCurrency
 import com.next.wallettracker.ui.utils.toMillis
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,7 +42,7 @@ class FormTransactionViewModel @Inject constructor(
                             oldState.copy(
                                 id = transaction.id,
                                 description = it.description,
-                                amount = it.amount,
+                                amount = it.amount.toCurrency(),
                                 date = it.createdAt,
                                 category = it.category,
                                 transactionType = it.transactionType,
@@ -73,7 +74,8 @@ class FormTransactionViewModel @Inject constructor(
             is FormEvent.TransactionTypeChanged -> _formUiState.update {
                 it.copy(
                     transactionType = event.type,
-                    categoriesForTransactionType = getCategoriesForTransactionType(event.type)
+                    categoriesForTransactionType = getCategoriesForTransactionType(event.type),
+                    category = if(event.type == TransactionType.INCOME) Category.BUSINESS else Category.FOOD
                 )
             }
 
@@ -83,7 +85,7 @@ class FormTransactionViewModel @Inject constructor(
         }
     }
 
-    private fun reset() {
+    fun reset() {
         _formUiState.update { FormUiState() }
     }
 
@@ -119,7 +121,7 @@ class FormTransactionViewModel @Inject constructor(
 sealed class FormEvent {
 
     data class DescriptionChanged(val description: String) : FormEvent()
-    data class AmountChanged(val amount: Double) : FormEvent()
+    data class AmountChanged(val amount: String) : FormEvent()
     data class DateChanged(val date: Long) : FormEvent()
     data class CategoryChanged(val name: String) : FormEvent()
     data class TransactionTypeChanged(val type: TransactionType) : FormEvent()
@@ -129,7 +131,7 @@ sealed class FormEvent {
 data class FormUiState(
     val id: Long = 0,
     val description: String = "",
-    val amount: Double = 0.0,
+    val amount: String = "",
     val date: Long = LocalDate.now().toMillis(),
     val category: Category = Category.BUSINESS,
     val categoriesForTransactionType: List<Category> = getCategoriesForTransactionType(
@@ -144,7 +146,7 @@ data class FormUiState(
     fun toModel(): Transaction = Transaction(
         id = id,
         description = description,
-        amount = amount,
+        amount = amount.toDouble(),
         createdAt = date,
         category = category,
         transactionType = transactionType
