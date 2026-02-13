@@ -651,11 +651,6 @@ private fun EnhancedDateField(
 ) {
 
     val dateDialogState = rememberMaterialDialogState()
-//    var showModal by remember { mutableStateOf(false) }
-//    val datePickerState = rememberDatePickerState(
-//        initialSelectedDateMillis = date
-//    )
-//
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = "Date",
