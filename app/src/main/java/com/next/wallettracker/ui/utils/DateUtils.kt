@@ -7,8 +7,22 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+fun Long.humanReadableDateMonth(
+    zoneId: ZoneId = ZoneId.systemDefault(),
+    locale: Locale = Locale.FRENCH
+): String {
 
-fun Long.toDisplayDate() : String = "Hier"
+    val date = Instant.ofEpochMilli(this)
+        .atZone(zoneId)
+        .toLocalDate()
+    val today = LocalDate.now()
+    return when {
+        date.isEqual(today.minusDays(1)) -> "Hier"
+        date.isEqual(today) -> "Aujourd'hui"
+        else -> date.format(DateTimeFormatter.ofPattern("d MMMM", locale))
+    }
+}
+
 
 fun Long.toHumanDate(
     locale: Locale = Locale.FRENCH,
