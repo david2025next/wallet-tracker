@@ -404,16 +404,16 @@ fun AmountInputField(
                     singleLine = true,
                     modifier = Modifier.weight(1f),
                     decorationBox = { innerTextField ->
-                        if (fieldValue.isEmpty()) {
-                            Text(
-                                text = placeholder,
-                                style = MaterialTheme.typography.headlineMedium.copy(
-                                    fontWeight = FontWeight.Bold
-                                ),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
-                            )
+                        Box {
+                            if (fieldValue.isEmpty()) {
+                                Text(
+                                    text = placeholder,
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                                )
+                            }
+                            innerTextField()
                         }
-                        innerTextField()
                     }
                 )
 
@@ -596,7 +596,7 @@ private fun EnhancedCategoryField(
                     DropdownMenuItem(
                         text = {
                             Text(
-                                text = category.name,
+                                text = category.key,
                                 style = MaterialTheme.typography.bodyMedium.copy(
                                     fontWeight = FontWeight.Medium
                                 )

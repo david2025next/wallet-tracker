@@ -22,7 +22,7 @@ class TransactionsRepositoryImpl @Inject constructor(
 
     override fun getRecentTransactionsStream(count: Int): Flow<List<Transaction>> =
         transactionDao.getTransactionsEntitiesStream(count)
-            .map { it.map(TransactionEntity::asExternalModel) }
+            .map { it.map(TransactionEntity::asExternalModel).sortedByDescending {trans -> trans.createdAt } }
 
     override fun getBalance(): Flow<Double> = transactionDao.getBalance()
 

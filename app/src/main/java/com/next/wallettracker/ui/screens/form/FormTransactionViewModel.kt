@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 
@@ -131,7 +132,7 @@ sealed class FormEvent {
 data class FormUiState(
     val id: Long = 0,
     val description: String = "",
-    val amount: String = "",
+    val amount: String = "500.0",
     val date: Long = LocalDate.now().toMillis(),
     val category: Category = Category.BUSINESS,
     val categoriesForTransactionType: List<Category> = getCategoriesForTransactionType(

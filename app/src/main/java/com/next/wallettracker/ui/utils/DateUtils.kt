@@ -3,6 +3,7 @@ package com.next.wallettracker.ui.utils
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -38,7 +39,8 @@ fun Long.toHumanDate(
 
 fun LocalDate.toMillis(zoneId: ZoneId = ZoneId.systemDefault()): Long {
     return this
-        .atStartOfDay(zoneId)
+        .atTime(LocalTime.now())
+        .atZone(zoneId)
         .toInstant()
         .toEpochMilli()
 }
