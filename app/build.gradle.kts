@@ -43,6 +43,7 @@ android {
 
 dependencies {
 
+    implementation(libs.androidx.navigation.compose)
     implementation("androidx.compose.material:material-icons-extended")
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.hilt.android)

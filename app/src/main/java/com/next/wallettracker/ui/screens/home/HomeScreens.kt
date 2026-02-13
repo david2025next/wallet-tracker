@@ -67,6 +67,7 @@ import com.next.wallettracker.R
 import com.next.wallettracker.data.models.Category
 import com.next.wallettracker.data.models.Transaction
 import com.next.wallettracker.data.models.TransactionType
+import com.next.wallettracker.ui.components.WalletBottomNavigation
 import com.next.wallettracker.ui.components.itemsBottomNavigation
 import com.next.wallettracker.ui.theme.WallettrackerTheme
 import com.next.wallettracker.ui.utils.toCurrency
@@ -83,7 +84,7 @@ fun HasTransactionsScreen(
 ) {
     Scaffold(
         bottomBar = {
-            WalletBottomNavigation()
+            WalletBottomNavigation(selectedItemIndex = 0)
         },
         topBar = { HomeTopBar(R.string.app_name) },
         floatingActionButton = {
@@ -103,30 +104,6 @@ fun HasTransactionsScreen(
     }
 }
 
-@Composable
-private fun WalletBottomNavigation() {
-
-    var selectedItemIndex by remember { mutableStateOf(0) }
-    NavigationBar(
-        containerColor = MaterialTheme.colorScheme.background
-    ) {
-        itemsBottomNavigation.forEachIndexed { index, item ->
-            NavigationBarItem(
-                selected = selectedItemIndex == index,
-                onClick = {
-                    selectedItemIndex = index
-                },
-                icon = {
-                    Icon(
-                        imageVector = if(selectedItemIndex==index) item.selectedIcon else item.unselectedIcon,
-                        contentDescription = stringResource(item.title)
-                    )
-                },
-                label = {Text(text = stringResource(item.title))}
-            )
-        }
-    }
-}
 
 @Composable
 private fun Dashboard(
