@@ -53,6 +53,8 @@ import com.next.wallettracker.data.models.Transaction
 import com.next.wallettracker.data.models.TransactionType
 import com.next.wallettracker.ui.components.WalletBottomNavigation
 import com.next.wallettracker.ui.utils.toCurrency
+import com.next.wallettracker.ui.utils.toFormattedDate
+import com.next.wallettracker.ui.utils.toHumanDate
 import java.time.LocalDate
 
 private val filters = listOf(
@@ -121,7 +123,7 @@ private fun FinanceRoute(
             item {
                 SpendingSummaryCard(
                     balance = uiState.balance,
-                    categories = uiState.categoriesUiState
+                    categories = uiState.categoriesWeight
                 )
             }
             uiState.dailiesTransactions.forEach { dailyTransactions ->
@@ -157,7 +159,7 @@ fun FilterSection(selectedFilter: Int, onSelectedChanged: (Int) -> Unit) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun SpendingSummaryCard(balance: Double, categories: List<CategoryUiState>) {
+fun SpendingSummaryCard(balance: Double, categories: List<CategoryWeight>) {
 
     Card(
         modifier = Modifier
@@ -304,7 +306,7 @@ fun DateHeader(date: LocalDate) {
         )
     ) {
         Text(
-            text = date.toString(),
+            text = date.toHumanDate(),
             style = MaterialTheme.typography.labelLarge
         )
         HorizontalDivider(
@@ -314,65 +316,4 @@ fun DateHeader(date: LocalDate) {
     }
 }
 
-@Preview
-@Composable
-private fun FinanceRoutePreview() {
-    val uiStateExample = FinanceUiState(
-        selectedFilter = 0,
-        balance = 1650.00,
-        categoriesUiState = listOf(
-            CategoryUiState("Shopping", 0.4f),
-            CategoryUiState("Food", 0.3f),
-            CategoryUiState("Internet", 0.3f),
-            CategoryUiState("Vache", 0.1f)
-        ),
-        dailiesTransactions = listOf(
-            DailyTransactions(
-                date = LocalDate.now(),
-                transactions = listOf(
-                    Transaction(
-                        id = 1L,
-                        description = "Youtube Premium",
-                        amount = 169.99,
-                        category = Category.INTERNET,
-                        createdAt = System.currentTimeMillis(),
-                        transactionType = TransactionType.EXPENSE
-                    ),
-                    Transaction(
-                        id = 2L,
-                        description = "Salaire Mensuel",
-                        amount = 2500.0,
-                        category = Category.SALARY,
-                        createdAt = System.currentTimeMillis(),
-                        transactionType = TransactionType.INCOME
-                    )
-                )
-            ),
-            DailyTransactions(
-                date = LocalDate.now(),
-                transactions = listOf(
-                    Transaction(
-                        id = 1L,
-                        description = "Youtube Premium",
-                        amount = 169.99,
-                        category = Category.INTERNET,
-                        createdAt = System.currentTimeMillis(),
-                        transactionType = TransactionType.EXPENSE
-                    ),
-                    Transaction(
-                        id = 2L,
-                        description = "Salaire Mensuel",
-                        amount = 2500.0,
-                        category = Category.SALARY,
-                        createdAt = System.currentTimeMillis(),
-                        transactionType = TransactionType.INCOME
-                    )
-                )
-            )
-        )
-    )
-    FinanceRoute(
-        uiState = uiStateExample
-    )
-}
 

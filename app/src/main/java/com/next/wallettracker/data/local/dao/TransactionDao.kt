@@ -5,10 +5,18 @@ import androidx.room.Query
 import androidx.room.Upsert
 import com.next.wallettracker.data.local.entities.TransactionEntity
 import com.next.wallettracker.data.local.entities.TransactionPeriodTotalsSpentEntity
+import com.next.wallettracker.data.models.Transaction
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TransactionDao {
+
+
+    @Query("""
+        SELECT *from transactions ORDER BY createdAt DESC 
+    """)
+    fun getAllTransactionsEntityStream() : Flow<List<TransactionEntity>>
+
 
     @Upsert
     suspend fun upsert(transactionEntity: TransactionEntity)

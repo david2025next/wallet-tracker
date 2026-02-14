@@ -22,15 +22,19 @@ class TransactionsRepositoryImpl @Inject constructor(
 
     override fun getRecentTransactionsStream(count: Int): Flow<List<Transaction>> =
         transactionDao.getTransactionsEntitiesStream(count)
-            .map { it.map(TransactionEntity::asExternalModel).sortedByDescending {trans -> trans.createdAt } }
+            .map {
+                it.map(TransactionEntity::asExternalModel)
+                    .sortedByDescending { trans -> trans.createdAt }
+            }
 
     override fun getBalance(): Flow<Double> = transactionDao.getBalance()
 
     override fun getTotalsSpentByPeriod(
         start: Long,
         end: Long
-    ): Flow<TransactionPeriodTotalsSpent>  = transactionDao.getTotalsSpentPeriodTotalsStream(start, end)
-        .map{it.asExternalModel()}
+    ): Flow<TransactionPeriodTotalsSpent> =
+        transactionDao.getTotalsSpentPeriodTotalsStream(start, end)
+            .map { it.asExternalModel() }
 
 
     override suspend fun upsertTransaction(transaction: Transaction) {
@@ -39,5 +43,9 @@ class TransactionsRepositoryImpl @Inject constructor(
 
     override fun getTransactionById(id: Long): Flow<Transaction?> =
         transactionDao.getTransactionEntityByIdStream(id).map { it?.asExternalModel() }
+
+    override fun getAllTransactionsStream(): Flow<List<Transaction>> =
+        transactionDao.getAllTransactionsEntityStream()
+            .map { it.map(TransactionEntity::asExternalModel) }
 
 }

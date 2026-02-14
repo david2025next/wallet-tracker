@@ -8,6 +8,13 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+fun Long.toFormattedDate() : String{
+    val formatter = DateTimeFormatter.ofPattern("EEE dd MMM yyyy", Locale.getDefault())
+    return Instant.ofEpochMilli(this)
+        .atZone(ZoneId.systemDefault())
+        .toLocalDate()
+        .format(formatter)
+}
 fun Long.humanReadableDateMonth(
     zoneId: ZoneId = ZoneId.systemDefault(),
     locale: Locale = Locale.FRENCH
@@ -27,7 +34,7 @@ fun Long.humanReadableDateMonth(
 fun LocalDate.toHumanDate(
     locale: Locale = Locale.FRENCH,
     zoneId: ZoneId = ZoneId.systemDefault()
-) : String = DateTimeFormatter.ofPattern("d MMM yyyy", locale).format(this)
+) : String = DateTimeFormatter.ofPattern("EEE dd MMM yyyy", locale).format(this)
 
 fun Long.toDate(
     locale: Locale = Locale.FRENCH,
