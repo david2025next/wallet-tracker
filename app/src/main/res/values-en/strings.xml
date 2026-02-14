@@ -12,4 +12,5 @@
     <string name="accueil">Home</string>
     <string name="transactions">Transactions</string>
     <string name="analyse">Analytics</string>
+    <string name="tout">All</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.next.wallettracker.data.models
 
+import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BusinessCenter
 import androidx.compose.material.icons.filled.DirectionsCar
@@ -9,6 +10,7 @@ import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Savings
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.next.wallettracker.R
 
 
 enum class Category(val key : String, val icon : ImageVector, val type: TransactionType){
@@ -30,7 +32,7 @@ enum class Category(val key : String, val icon : ImageVector, val type: Transact
 }
 
 
-enum class TransactionType{
-    INCOME,
-    EXPENSE
+enum class TransactionType(@StringRes val displayName : Int){
+    INCOME(R.string.revenu),
+    EXPENSE(R.string.depense)
 }

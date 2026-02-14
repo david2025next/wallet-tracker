@@ -250,7 +250,7 @@ private fun TransactionItem(transaction: Transaction) {
         },
         trailingContent = {
             Text(
-                text = "${if (transaction.transactionType == TransactionType.EXPENSE) "-" else "+"} ${transaction.amount.toCurrency()}",
+                text = "${if (transaction.transactionType == TransactionType.EXPENSE) "-" else "+"}${transaction.amount.toCurrency()}",
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold,
                 color = if (transaction.transactionType == TransactionType.EXPENSE) MaterialTheme.colorScheme.error else Color(
@@ -483,7 +483,7 @@ private fun BalanceCardOverview(balance: Double, totalExpense: Double, totalInco
 }
 
 @Composable
-private fun CustomIcon(
+fun CustomIcon(
     icon: ImageVector,
     size: Dp,
     backgroundColor: Color,

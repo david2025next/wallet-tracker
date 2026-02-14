@@ -1,25 +1,378 @@
 package com.next.wallettracker.ui.screens.transactions
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CalendarToday
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.next.wallettracker.R
+import com.next.wallettracker.data.models.Category
+import com.next.wallettracker.data.models.Transaction
+import com.next.wallettracker.data.models.TransactionType
 import com.next.wallettracker.ui.components.WalletBottomNavigation
+import com.next.wallettracker.ui.utils.toCurrency
+import java.time.LocalDate
+
+private val filters = listOf(
+    R.string.tout,
+    R.string.revenu,
+    R.string.depense
+)
+private val categoriesColors = listOf(
+    Color(0xFF2962FF),
+    Color(0xFF2E7D32),
+    Color(0xFFFFAB00),
+    Color(0xFFFF5252),
+    Color(0xFFBDBDBD)
+)
 
 @Composable
-fun TransactionsRoute(modifier: Modifier = Modifier) {
+fun TransactionsRoute(financeViewModel: FinanceViewModel = hiltViewModel()) {
 
+    val uiState by financeViewModel.financeUiState.collectAsStateWithLifecycle()
+    FinanceRoute(
+        uiState = uiState
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun FinanceRoute(
+    uiState: FinanceUiState
+) {
     Scaffold(
-        bottomBar = { WalletBottomNavigation(1) }
+        bottomBar = {
+            WalletBottomNavigation(1)
+        },
+        topBar = {
+            CenterAlignedTopAppBar(
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                ),
+                title = {
+                    Text(
+                        text = "Mon, 21 Dec 2025",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = {}) {
+                        Icon(Icons.Outlined.CalendarToday, contentDescription = "Calendar")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = {}) {
+                        Icon(Icons.Outlined.Search, contentDescription = "Search")
+                    }
+                }
+            )
+        }
     ) { paddingValues ->
-        Box(
-            modifier = modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ){
-            Text("transactions screen")
+
+        LazyColumn(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+        ) {
+            item { FilterSection(selectedFilter = uiState.selectedFilter, onSelectedChanged = {}) }
+            item {
+                SpendingSummaryCard(
+                    balance = uiState.balance,
+                    categories = uiState.categoriesUiState
+                )
+            }
+            uiState.dailiesTransactions.forEach { dailyTransactions ->
+                item { DateHeader(date = dailyTransactions.date) }
+                items(dailyTransactions.transactions) { transaction ->
+                    TransactionItem(transaction)
+                }
+            }
         }
     }
 }
+
+@Composable
+fun FilterSection(selectedFilter: Int, onSelectedChanged: (Int) -> Unit) {
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        filters.forEach { filter ->
+            val isSelected = selectedFilter == filter
+            FilterChip(
+                selected = isSelected,
+                onClick = { onSelectedChanged(filter) },
+                label = { Text(stringResource(filter)) },
+                shape = RoundedCornerShape(50),
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun SpendingSummaryCard(balance: Double, categories: List<CategoryUiState>) {
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = MaterialTheme.shapes.large
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.solde_total),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = balance.toCurrency(),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(12.dp)
+                    .clip(RoundedCornerShape(6.dp))
+            ) {
+                categories.forEachIndexed { index, cat ->
+                    Box(
+                        modifier = Modifier
+                            .weight(cat.weight)
+                            .fillMaxHeight()
+                            .background(categoriesColors[index])
+                    )
+                    Spacer(
+                        modifier = Modifier
+                            .width(2.dp)
+                            .background(Color.White)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                categories.forEachIndexed { index, category ->
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .background(categoriesColors[index], CircleShape)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = category.name,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TransactionItem(transaction: Transaction) {
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Surface(
+            modifier = Modifier.size(48.dp),
+            shape = CircleShape
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = transaction.category.icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.width(16.dp))
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = transaction.description,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(
+                text = transaction.category.key,
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.Gray
+            )
+        }
+
+        Column(horizontalAlignment = Alignment.End) {
+            val amountColor = if (transaction.transactionType == TransactionType.INCOME)
+                Color(0xFF2E7D32)
+            else
+                Color(0xFFD32F2F)
+
+            val amountPrefix =
+                if (transaction.transactionType == TransactionType.INCOME) "+$" else "-$"
+
+            Text(
+                text = "$amountPrefix${transaction.amount}",
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold,
+                color = amountColor
+            )
+            Text(
+                text = if (transaction.transactionType == TransactionType.INCOME) "Income" else "Expense",
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.Gray
+            )
+        }
+    }
+}
+
+
+@Composable
+fun DateHeader(date: LocalDate) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(
+            horizontal = 16.dp
+        )
+    ) {
+        Text(
+            text = date.toString(),
+            style = MaterialTheme.typography.labelLarge
+        )
+        HorizontalDivider(
+            modifier = Modifier.padding(horizontal = 8.dp),
+            color = Color.LightGray
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun FinanceRoutePreview() {
+    val uiStateExample = FinanceUiState(
+        selectedFilter = 0,
+        balance = 1650.00,
+        categoriesUiState = listOf(
+            CategoryUiState("Shopping", 0.4f),
+            CategoryUiState("Food", 0.3f),
+            CategoryUiState("Internet", 0.3f),
+            CategoryUiState("Vache", 0.1f)
+        ),
+        dailiesTransactions = listOf(
+            DailyTransactions(
+                date = LocalDate.now(),
+                transactions = listOf(
+                    Transaction(
+                        id = 1L,
+                        description = "Youtube Premium",
+                        amount = 169.99,
+                        category = Category.INTERNET,
+                        createdAt = System.currentTimeMillis(),
+                        transactionType = TransactionType.EXPENSE
+                    ),
+                    Transaction(
+                        id = 2L,
+                        description = "Salaire Mensuel",
+                        amount = 2500.0,
+                        category = Category.SALARY,
+                        createdAt = System.currentTimeMillis(),
+                        transactionType = TransactionType.INCOME
+                    )
+                )
+            ),
+            DailyTransactions(
+                date = LocalDate.now(),
+                transactions = listOf(
+                    Transaction(
+                        id = 1L,
+                        description = "Youtube Premium",
+                        amount = 169.99,
+                        category = Category.INTERNET,
+                        createdAt = System.currentTimeMillis(),
+                        transactionType = TransactionType.EXPENSE
+                    ),
+                    Transaction(
+                        id = 2L,
+                        description = "Salaire Mensuel",
+                        amount = 2500.0,
+                        category = Category.SALARY,
+                        createdAt = System.currentTimeMillis(),
+                        transactionType = TransactionType.INCOME
+                    )
+                )
+            )
+        )
+    )
+    FinanceRoute(
+        uiState = uiStateExample
+    )
+}
+
