@@ -17,7 +17,7 @@ fun Long.toFormattedDate() : String{
 }
 fun Long.humanReadableDateMonth(
     zoneId: ZoneId = ZoneId.systemDefault(),
-    locale: Locale = Locale.FRENCH
+    locale: Locale = Locale.getDefault()
 ): String {
 
     val date = Instant.ofEpochMilli(this)
@@ -32,12 +32,10 @@ fun Long.humanReadableDateMonth(
 }
 
 fun LocalDate.toHumanDate(
-    locale: Locale = Locale.FRENCH,
-    zoneId: ZoneId = ZoneId.systemDefault()
+    locale: Locale = Locale.getDefault(),
 ) : String = DateTimeFormatter.ofPattern("EEE dd MMM yyyy", locale).format(this)
 
 fun Long.toDate(
-    locale: Locale = Locale.FRENCH,
     zoneId: ZoneId = ZoneId.systemDefault()
 ): LocalDate {
     val date = Instant.ofEpochMilli(this)

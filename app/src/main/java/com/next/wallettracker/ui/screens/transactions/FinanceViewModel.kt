@@ -5,12 +5,17 @@ import androidx.lifecycle.viewModelScope
 import com.next.wallettracker.data.models.Transaction
 import com.next.wallettracker.data.models.TransactionType
 import com.next.wallettracker.data.repository.TransactionsRepository
+import com.next.wallettracker.domain.models.CategoryWeight
+import com.next.wallettracker.domain.models.DailyTransactions
 import com.next.wallettracker.ui.utils.toDate
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -21,38 +26,44 @@ class FinanceViewModel @Inject constructor(
     private val transactionsRepository: TransactionsRepository
 ) : ViewModel() {
 
-    private var allTransactions: List<Transaction>? = null
+    private var _selectedFilter = MutableStateFlow(TransactionFilter.ALL)
 
-    private val _financeUiState = MutableStateFlow(
-        FinanceUiState()
+    val financeUiState: StateFlow<FinanceUiState> = combine(
+        transactionsRepository.getBalance(),
+        transactionsRepository.getAllTransactionsStream(),
+        _selectedFilter
+    ) { balance, allTransactions, filter ->
+
+        val filteredTransactions = when (filter) {
+            TransactionFilter.ALL -> allTransactions
+            TransactionFilter.INCOME -> allTransactions.filter { it.transactionType == TransactionType.INCOME }
+            TransactionFilter.EXPENSE -> allTransactions.filter { it.transactionType == TransactionType.EXPENSE }
+        }
+
+        val dailies = filteredTransactions.groupByDay()
+        val weights = allTransactions.groupByCategoryWithPercentage()
+        FinanceUiState(
+            dailiesTransactions = dailies,
+            categoriesWeight = weights,
+            isLoading = false,
+            selectedFilter = filter,
+            balance = balance
+        )
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000L),
+        FinanceUiState(isLoading = true)
     )
 
-    val financeUiState = _financeUiState.asStateFlow()
 
-    init {
-        viewModelScope.launch {
-            combine(
-                transactionsRepository.getBalance(),
-                transactionsRepository.getAllTransactionsStream()
-            ) { balance, transactions ->
-                allTransactions = transactions
-                val dailiesTransactions = transactions.groupTransactionsByDay()
-                val categoriesWeight = transactions.groupByCategoryWithPercentage()
-
-                _financeUiState.update {
-                    it.copy(
-                        balance = balance,
-                        dailiesTransactions = dailiesTransactions,
-                        categoriesWeight = categoriesWeight
-                    )
-                }
-            }.collect()
-        }
+    fun updateFilter(filter: TransactionFilter){
+        _selectedFilter.update { filter }
     }
 }
 
 private fun List<Transaction>.groupByCategoryWithPercentage(): List<CategoryWeight> {
-    val totalAmount = this.filter { it.transactionType == TransactionType.EXPENSE }.sumOf { it.amount }
+    val totalAmount =
+        this.filter { it.transactionType == TransactionType.EXPENSE }.sumOf { it.amount }
     return this.filter { it.transactionType == TransactionType.EXPENSE }.groupBy { it.category.key }
         .map { (category, transactions) ->
             val categoryTotal = transactions.sumOf { it.amount }
@@ -64,7 +75,7 @@ private fun List<Transaction>.groupByCategoryWithPercentage(): List<CategoryWeig
         .take(5)
 }
 
-private fun List<Transaction>.groupTransactionsByDay(): List<DailyTransactions> {
+private fun List<Transaction>.groupByDay(): List<DailyTransactions> {
     val grouping = this.groupBy { it.createdAt.toDate() }
     return grouping.map { (key, transactions) ->
         DailyTransactions(
@@ -76,18 +87,17 @@ private fun List<Transaction>.groupTransactionsByDay(): List<DailyTransactions> 
 
 
 data class FinanceUiState(
-    val selectedFilter: Int = 0,
+    val isLoading: Boolean = false,
+    val selectedFilter: TransactionFilter = TransactionFilter.ALL,
     val balance: Double = 0.0,
     val categoriesWeight: List<CategoryWeight> = emptyList(),
     val dailiesTransactions: List<DailyTransactions> = emptyList()
 )
 
-data class CategoryWeight(
-    val name: String,
-    val weight: Float
-)
 
-data class DailyTransactions(
-    val date: LocalDate,
-    val transactions: List<Transaction>
-)
+
+
+
+enum class TransactionFilter {
+    ALL, INCOME, EXPENSE
+}

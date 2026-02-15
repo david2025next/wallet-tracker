@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -25,6 +26,7 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
@@ -51,6 +53,7 @@ import com.next.wallettracker.R
 import com.next.wallettracker.data.models.Category
 import com.next.wallettracker.data.models.Transaction
 import com.next.wallettracker.data.models.TransactionType
+import com.next.wallettracker.domain.models.CategoryWeight
 import com.next.wallettracker.ui.components.WalletBottomNavigation
 import com.next.wallettracker.ui.utils.toCurrency
 import com.next.wallettracker.ui.utils.toFormattedDate
@@ -75,14 +78,18 @@ fun TransactionsRoute(financeViewModel: FinanceViewModel = hiltViewModel()) {
 
     val uiState by financeViewModel.financeUiState.collectAsStateWithLifecycle()
     FinanceRoute(
-        uiState = uiState
+        uiState = uiState,
+        onSelectedChanged = {
+            financeViewModel.updateFilter(it)
+        }
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FinanceRoute(
-    uiState: FinanceUiState
+    uiState: FinanceUiState,
+    onSelectedChanged: (TransactionFilter) -> Unit
 ) {
     Scaffold(
         bottomBar = {
@@ -114,22 +121,37 @@ private fun FinanceRoute(
         }
     ) { paddingValues ->
 
-        LazyColumn(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-        ) {
-            item { FilterSection(selectedFilter = uiState.selectedFilter, onSelectedChanged = {}) }
-            item {
-                SpendingSummaryCard(
-                    balance = uiState.balance,
-                    categories = uiState.categoriesWeight
-                )
+        if(uiState.isLoading){
+
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ){
+                CircularProgressIndicator()
             }
-            uiState.dailiesTransactions.forEach { dailyTransactions ->
-                item { DateHeader(date = dailyTransactions.date) }
-                items(dailyTransactions.transactions) { transaction ->
-                    TransactionItem(transaction)
+        }
+        else {
+
+            LazyColumn(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 80.dp)
+            ) {
+                item { FilterSection(selectedFilter = uiState.selectedFilter, onSelectedChanged = onSelectedChanged) }
+                item {
+                    SpendingSummaryCard(
+                        balance = uiState.balance,
+                        categories = uiState.categoriesWeight
+                    )
+                }
+                uiState.dailiesTransactions.forEach { dailyTransactions ->
+                    stickyHeader(key = dailyTransactions.date) {
+                        DateHeader(date = dailyTransactions.date)
+                    }
+                    items(dailyTransactions.transactions, key = {it.id}) { transaction ->
+                        TransactionItem(transaction)
+                    }
                 }
             }
         }
@@ -137,7 +159,7 @@ private fun FinanceRoute(
 }
 
 @Composable
-fun FilterSection(selectedFilter: Int, onSelectedChanged: (Int) -> Unit) {
+fun FilterSection(selectedFilter: TransactionFilter, onSelectedChanged: (TransactionFilter) -> Unit) {
 
     Row(
         modifier = Modifier
@@ -145,12 +167,14 @@ fun FilterSection(selectedFilter: Int, onSelectedChanged: (Int) -> Unit) {
             .padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        filters.forEach { filter ->
+
+        TransactionFilter.entries.forEachIndexed { index, filter ->
             val isSelected = selectedFilter == filter
+            val res = filters[index % filters.size]
             FilterChip(
                 selected = isSelected,
                 onClick = { onSelectedChanged(filter) },
-                label = { Text(stringResource(filter)) },
+                label = { Text(stringResource(res)) },
                 shape = RoundedCornerShape(50),
             )
         }
@@ -216,11 +240,12 @@ fun SpendingSummaryCard(balance: Double, categories: List<CategoryWeight>) {
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 categories.forEachIndexed { index, category ->
+                    val color = categoriesColors[index % categoriesColors.size]
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
                             modifier = Modifier
                                 .size(8.dp)
-                                .background(categoriesColors[index], CircleShape)
+                                .background(color, CircleShape)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
