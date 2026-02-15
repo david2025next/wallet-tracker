@@ -211,7 +211,7 @@ fun LoadingContent(modifier: Modifier = Modifier) {
 private fun TransactionsList(transactions: List<Transaction>) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(horizontal = 8.dp)
+        contentPadding = PaddingValues(horizontal = 8.dp,)
     ) {
         items(transactions) { transaction ->
             TransactionItem(transaction)
@@ -253,7 +253,7 @@ private fun TransactionItem(transaction: Transaction) {
                 text = "${if (transaction.transactionType == TransactionType.EXPENSE) "-" else "+"}${transaction.amount.toCurrency()}",
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold,
-                color = if (transaction.transactionType == TransactionType.EXPENSE) MaterialTheme.colorScheme.error else Color(
+                color = if (transaction.transactionType == TransactionType.EXPENSE) Color(0xFFD32F2F) else Color(
                     0xff2e7d32
                 )
             )
@@ -351,10 +351,10 @@ private fun BalanceCardOverview(balance: Double, totalExpense: Double, totalInco
                             horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             Text(
-                                text = totalIncome.toCurrency(),
+                                text =" ${totalIncome.toCurrency()}",
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                                color = Color(0xFF2E7D32)
                             )
                             Icon(
                                 imageVector = Icons.Filled.ArrowOutward,
@@ -395,7 +395,7 @@ private fun BalanceCardOverview(balance: Double, totalExpense: Double, totalInco
                                 text = " ${totalExpense.toCurrency()}",
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onErrorContainer
+                                color = Color(0xFFD32F2F)
                             )
                             Icon(
                                 imageVector = Icons.Filled.SouthEast,

@@ -10,21 +10,21 @@ import javax.inject.Inject
 class CalculateFinanceStatsUseCase @Inject constructor() {
 
     data class Result(
+        val totalBalance : Double,
         val categoryWeights : List<CategoryWeight>,
         val dailyTransactions : List<DailyTransactions>
     )
 
-    operator fun invoke(transactions : List<Transaction>) : Result{
+    operator fun invoke(transactions : List<Transaction>, currentBalance : Double ?) : Result{
 
-        val expenseTransactions = transactions.filter { it.transactionType == TransactionType.EXPENSE }
-        val totalExpense = expenseTransactions.sumOf { it.amount }
-        val categoriesWeight = expenseTransactions
+        val totalBalance = currentBalance ?: transactions.sumOf { it.amount }
+        val categoriesWeight = transactions
             .groupBy { it.category.key }
             .map { (categoryName, txs) ->
                 val categoryTotal = txs.sumOf { it.amount }
                 CategoryWeight(
                     name = categoryName,
-                    weight = if (totalExpense == 0.0) 0f else (categoryTotal / totalExpense).toFloat()
+                    weight = if (totalBalance == 0.0) 0f else (categoryTotal / totalBalance).toFloat()
                 )
             }
             .sortedByDescending { it.weight }
@@ -42,6 +42,7 @@ class CalculateFinanceStatsUseCase @Inject constructor() {
             .sortedByDescending { it.date }
 
         return Result(
+            totalBalance =totalBalance ,
             categoryWeights = categoriesWeight,
             dailyTransactions = dailies
         )

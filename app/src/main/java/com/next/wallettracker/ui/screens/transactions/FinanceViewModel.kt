@@ -7,6 +7,7 @@ import com.next.wallettracker.data.models.TransactionType
 import com.next.wallettracker.data.repository.TransactionsRepository
 import com.next.wallettracker.domain.models.CategoryWeight
 import com.next.wallettracker.domain.models.DailyTransactions
+import com.next.wallettracker.domain.use_cases.CalculateFinanceStatsUseCase
 import com.next.wallettracker.ui.utils.toDate
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,7 +24,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FinanceViewModel @Inject constructor(
-    private val transactionsRepository: TransactionsRepository
+    private val transactionsRepository: TransactionsRepository,
+    private val calculateFinanceStatsUseCase: CalculateFinanceStatsUseCase
 ) : ViewModel() {
 
     private var _selectedFilter = MutableStateFlow(TransactionFilter.ALL)
@@ -40,14 +42,15 @@ class FinanceViewModel @Inject constructor(
             TransactionFilter.EXPENSE -> allTransactions.filter { it.transactionType == TransactionType.EXPENSE }
         }
 
-        val dailies = filteredTransactions.groupByDay()
-        val weights = allTransactions.groupByCategoryWithPercentage()
+        val currentBalance = if(filter != TransactionFilter.ALL) null else balance
+        val stats = calculateFinanceStatsUseCase(filteredTransactions, currentBalance )
+
         FinanceUiState(
-            dailiesTransactions = dailies,
-            categoriesWeight = weights,
+            dailiesTransactions = stats.dailyTransactions,
+            categoriesWeight = stats.categoryWeights,
             isLoading = false,
             selectedFilter = filter,
-            balance = balance
+            balance = stats.totalBalance
         )
     }.stateIn(
         viewModelScope,
