@@ -5,9 +5,9 @@ import javax.inject.Inject
 
 class ValidationAmountUseCase @Inject constructor() {
 
-    operator fun invoke(amount: String): ValidationResult {
+    operator fun invoke(amount: String, balance: Double? = null): ValidationResult {
 
-       val result =  try {
+        val result = try {
             val amountNumber = amount.toDouble()
             if (amountNumber < 0) {
                 return ValidationResult(
@@ -21,18 +21,27 @@ class ValidationAmountUseCase @Inject constructor() {
                     errorMessage = "Veuillez entrer un montant"
                 )
             }
+            if (balance != null) {
+                val isCorrect = balance - amountNumber >= 0
+                if(!isCorrect){
+                    return ValidationResult(
+                        success = false,
+                        errorMessage = "Le montant depasse votre solde actuel"
+                    )
+                }
+            }
             ValidationResult(success = true)
-        }catch (e : NumberFormatException){
-            if(amount.isBlank()){
+        } catch (e: NumberFormatException) {
+            if (amount.isBlank()) {
                 return ValidationResult(
                     success = false,
                     errorMessage = "Veuillez entrer un montant"
                 )
             }
-           return ValidationResult(
-               success = false,
-               errorMessage = e.message
-           )
+            return ValidationResult(
+                success = false,
+                errorMessage = e.message
+            )
         }
         return result
 

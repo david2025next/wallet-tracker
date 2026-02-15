@@ -64,31 +64,6 @@ class FinanceViewModel @Inject constructor(
     }
 }
 
-private fun List<Transaction>.groupByCategoryWithPercentage(): List<CategoryWeight> {
-    val totalAmount =
-        this.filter { it.transactionType == TransactionType.EXPENSE }.sumOf { it.amount }
-    return this.filter { it.transactionType == TransactionType.EXPENSE }.groupBy { it.category.key }
-        .map { (category, transactions) ->
-            val categoryTotal = transactions.sumOf { it.amount }
-            CategoryWeight(
-                name = category,
-                weight = if (totalAmount == 0.0) 0f else categoryTotal.toFloat() / totalAmount.toFloat()
-            )
-        }.sortedByDescending { it.weight }
-        .take(5)
-}
-
-private fun List<Transaction>.groupByDay(): List<DailyTransactions> {
-    val grouping = this.groupBy { it.createdAt.toDate() }
-    return grouping.map { (key, transactions) ->
-        DailyTransactions(
-            date = key,
-            transactions = transactions
-        )
-    }
-}
-
-
 data class FinanceUiState(
     val isLoading: Boolean = false,
     val selectedFilter: TransactionFilter = TransactionFilter.ALL,

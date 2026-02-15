@@ -57,6 +57,7 @@ import com.next.wallettracker.data.models.TransactionType
 import com.next.wallettracker.domain.models.CategoryWeight
 import com.next.wallettracker.ui.components.WalletBottomNavigation
 import com.next.wallettracker.ui.utils.toCurrency
+import com.next.wallettracker.ui.utils.toDay
 import com.next.wallettracker.ui.utils.toFormattedDate
 import com.next.wallettracker.ui.utils.toHumanDate
 import java.time.LocalDate
@@ -103,7 +104,7 @@ private fun FinanceRoute(
                 ),
                 title = {
                     Text(
-                        text = "Mon, 21 Dec 2025",
+                        text = toDay(),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -204,7 +205,7 @@ fun SpendingSummaryCard(balance: Double, categories: List<CategoryWeight>) {
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
-                    text = balance.toCurrency(),
+                    text = "${balance.toCurrency()} FCFA",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )

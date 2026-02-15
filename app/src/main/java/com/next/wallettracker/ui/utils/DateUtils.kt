@@ -15,6 +15,8 @@ fun Long.toFormattedDate() : String{
         .toLocalDate()
         .format(formatter)
 }
+
+fun toDay() : String = LocalDate.now().toHumanDate()
 fun Long.humanReadableDateMonth(
     zoneId: ZoneId = ZoneId.systemDefault(),
     locale: Locale = Locale.getDefault()

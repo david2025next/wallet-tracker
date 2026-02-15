@@ -15,6 +15,8 @@ import com.next.wallettracker.ui.utils.toMillis
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -29,6 +31,7 @@ class FormTransactionViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
+    private var balance : Double ? = null
     private val _formUiState = MutableStateFlow(FormUiState(isLoading = true))
 
     val formUiState = _formUiState.asStateFlow()
@@ -36,23 +39,30 @@ class FormTransactionViewModel @Inject constructor(
     init {
         val selectedTransactionId = savedStateHandle.get<Long>("id")
         viewModelScope.launch {
-            selectedTransactionId?.let { id ->
-                transactionsRepository.getTransactionById(id).collect { transaction ->
-                    transaction?.let {
-                        _formUiState.update { oldState ->
-                            oldState.copy(
-                                id = transaction.id,
-                                description = it.description,
-                                amount = it.amount.toCurrency(),
-                                date = it.createdAt.toDate(),
-                                category = it.category,
-                                transactionType = it.transactionType,
-                                isLoading = false
-                            )
+            launch {
+                selectedTransactionId?.let { id ->
+                    transactionsRepository.getTransactionById(id).collect { transaction ->
+                        transaction?.let {
+                            _formUiState.update { oldState ->
+                                oldState.copy(
+                                    id = transaction.id,
+                                    description = it.description,
+                                    amount = it.amount.toCurrency(),
+                                    date = it.createdAt.toDate(),
+                                    category = it.category,
+                                    transactionType = it.transactionType,
+                                    isLoading = false
+                                )
 
+                            }
                         }
+                        _formUiState.update { it.copy(isLoading = false) }
                     }
-                    _formUiState.update { it.copy(isLoading = false) }
+                }
+            }
+            launch {
+                transactionsRepository.getBalance().collect{
+                    balance = it
                 }
             }
             _formUiState.update { it.copy(isLoading = false) }
@@ -92,7 +102,8 @@ class FormTransactionViewModel @Inject constructor(
 
     private fun submit() {
 
-        val resultValidationAmount = validationAmountUseCase(formUiState.value.amount)
+        val balance = if(_formUiState.value.transactionType == TransactionType.EXPENSE) balance else null
+        val resultValidationAmount = validationAmountUseCase(formUiState.value.amount, balance)
         val resultValidationDescription =
             validationDescriptionUseCase(formUiState.value.description)
 
