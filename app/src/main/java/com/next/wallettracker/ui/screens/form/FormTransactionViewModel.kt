@@ -132,7 +132,7 @@ sealed class FormEvent {
 data class FormUiState(
     val id: Long = 0,
     val description: String = "",
-    val amount: String = "500.0",
+    val amount: String = "500",
     val date: LocalDate = LocalDate.now(),
     val category: Category = Category.BUSINESS,
     val categoriesForTransactionType: List<Category> = getCategoriesForTransactionType(

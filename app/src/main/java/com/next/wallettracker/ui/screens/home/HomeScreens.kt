@@ -341,7 +341,7 @@ private fun BalanceCardOverview(balance: Double, totalExpense: Double, totalInco
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
-                            text = " Revenu du mois",
+                            text = " ${stringResource(R.string.revenu_du_mois)}",
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                         )
@@ -382,7 +382,7 @@ private fun BalanceCardOverview(balance: Double, totalExpense: Double, totalInco
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text = " Dépense du mois",
+                            text =" ${stringResource(R.string.depense_du_mois)}",
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.7f)
                         )
@@ -412,70 +412,6 @@ private fun BalanceCardOverview(balance: Double, totalExpense: Double, totalInco
                         }
                     }
                 }
-
-//                Row(
-//                    verticalAlignment = Alignment.CenterVertically,
-//                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-//                ) {
-//                    Surface(
-//                        shape = CircleShape,
-//                        color = MaterialTheme.colorScheme.tertiaryContainer,
-//                        modifier = Modifier.size(40.dp)
-//                    ) {
-//                        Icon(
-//                            imageVector = Icons.AutoMirrored.Rounded.TrendingUp,
-//                            contentDescription = stringResource(R.string.revenu),
-//                            tint = MaterialTheme.colorScheme.onTertiaryContainer,
-//                            modifier = Modifier.padding(10.dp)
-//                        )
-//                    }
-//                    Column {
-//                        Text(
-//                            text = stringResource(R.string.revenu),
-//                            style = MaterialTheme.typography.bodySmall,
-//                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-//                        )
-//                        Text(
-//                            text =totalIncome.toCurrency(),
-//                            style = MaterialTheme.typography.titleSmall.copy(
-//                                fontWeight = FontWeight.SemiBold
-//                            ),
-//                            color = MaterialTheme.colorScheme.tertiary
-//                        )
-//                    }
-//                }
-
-//                Row(
-//                    verticalAlignment = Alignment.CenterVertically,
-//                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-//                ) {
-//                    Surface(
-//                        shape = CircleShape,
-//                        color = MaterialTheme.colorScheme.errorContainer,
-//                        modifier = Modifier.size(40.dp)
-//                    ) {
-//                        Icon(
-//                            imageVector = Icons.AutoMirrored.Rounded.TrendingDown,
-//                            contentDescription = "Dépenses",
-//                            tint = MaterialTheme.colorScheme.onErrorContainer,
-//                            modifier = Modifier.padding(10.dp)
-//                        )
-//                    }
-//                    Column {
-//                        Text(
-//                            text = stringResource(R.string.depense),
-//                            style = MaterialTheme.typography.bodySmall,
-//                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-//                        )
-//                        Text(
-//                            text = totalExpense.toCurrency(),
-//                            style = MaterialTheme.typography.titleSmall.copy(
-//                                fontWeight = FontWeight.SemiBold
-//                            ),
-//                            color = MaterialTheme.colorScheme.error
-//                        )
-//                    }
-//                }
             }
         }
     }

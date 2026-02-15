@@ -75,13 +75,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.next.wallettracker.R
 import com.next.wallettracker.data.models.Category
 import com.next.wallettracker.data.models.TransactionType
 import com.next.wallettracker.ui.WalletTrackerDestination
@@ -136,7 +139,7 @@ private fun FormTransactionRoute(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = if (uiState.id == 0L) "Nouvelle transaction" else "Modifier transaction",
+                        text = if (uiState.id == 0L) stringResource(R.string.nouvelle_transaction) else "Modifier transaction",
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.SemiBold
                         )
@@ -185,17 +188,16 @@ private fun FormTransactionRoute(
             ) {
 
                 AmountInputField(
-                    label = "Montant",
-                    fieldValue = uiState.amount.formatToCurrency(),
+                    label = stringResource(R.string.montant),
+                    fieldValue = uiState.amount,
                     error = uiState.errorAmount,
                     transactionType = uiState.transactionType,
-                    placeholder = "500".formatToCurrency(),
+                    placeholder = "500",
                     onfieldInputChanged = { onFormEvent(FormEvent.AmountChanged(it)) }
                 )
 
-
                 EnhancedInputField(
-                    label = "Description",
+                    label = stringResource(R.string.description),
                     fieldValue = uiState.description,
                     placeholder = "Ex: Courses du mois",
                     icon = Icons.AutoMirrored.Filled.Notes,
@@ -243,7 +245,7 @@ private fun FormTransactionRoute(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Ajouter la transaction",
+                        text = stringResource(R.string.ajouter_la_transaction),
                         style = MaterialTheme.typography.labelLarge.copy(
                             fontWeight = FontWeight.SemiBold,
                             letterSpacing = 0.5.sp
@@ -408,17 +410,20 @@ fun AmountInputField(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
                     ),
+                    visualTransformation = CurrencyVisualTransformation(),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Decimal
                     ),
                     singleLine = true,
                     modifier = Modifier.weight(1f),
                     decorationBox = { innerTextField ->
-                        Box {
+                        Box(
+                            modifier = Modifier
+                        ){
                             if (fieldValue.isEmpty()) {
                                 Text(
                                     text = placeholder,
-                                    style = MaterialTheme.typography.headlineMedium,
+                                    style = MaterialTheme.typography.bodyLarge,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
                                 )
                             }
@@ -494,6 +499,9 @@ fun EnhancedInputField(
                 fontWeight = FontWeight.Medium
             ),
             isError = error != null,
+            keyboardOptions = KeyboardOptions(
+                capitalization = KeyboardCapitalization.Words
+            ),
             leadingIcon = if (icon != null) {
                 {
                     Icon(
@@ -551,7 +559,7 @@ private fun EnhancedCategoryField(
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
-            text = "Catégorie",
+            text = stringResource(R.string.categorie),
             style = MaterialTheme.typography.labelSmall.copy(
                 fontWeight = FontWeight.SemiBold
             ),
@@ -653,7 +661,7 @@ private fun EnhancedDateField(
     val dateDialogState = rememberMaterialDialogState()
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
-            text = "Date",
+            text = stringResource(R.string.date),
             style = MaterialTheme.typography.labelSmall.copy(
                 fontWeight = FontWeight.SemiBold
             ),
@@ -708,13 +716,13 @@ private fun EnhancedDateField(
     MaterialDialog(
         dialogState = dateDialogState ,
         buttons = {
-            positiveButton(text = "OK")
-            negativeButton(text = "Annuler")
+            positiveButton(text = stringResource(R.string.ok))
+            negativeButton(text = stringResource(R.string.annuler))
         }
     ) {
         datepicker(
             initialDate = selectedDate,
-            title = "Selectionnez une date",
+            title = stringResource(R.string.selectionnez_une_date),
             allowedDateValidator = {
                 it <= LocalDate.now()
             }
@@ -722,51 +730,6 @@ private fun EnhancedDateField(
             onSelectedDate(it)
         }
     }
-
-//    if (showModal) {
-//        DatePickerDialog(
-//            onDismissRequest = { showModal = false },
-//            confirmButton = {
-//                TextButton(
-//                    onClick = {
-//                        datePickerState.selectedDateMillis?.let {
-//                            onSelectedDate(it)
-//                        }
-//                        showModal = false
-//                    }
-//                ) {
-//                    Text(
-//                        "Confirmer",
-//                        style = MaterialTheme.typography.labelSmall.copy(
-//                            fontWeight = FontWeight.SemiBold
-//                        )
-//                    )
-//                }
-//            },
-//            dismissButton = {
-//                TextButton(onClick = { showModal = false }) {
-//                    Text(
-//                        "Annuler",
-//                        style = MaterialTheme.typography.labelSmall.copy(
-//                            fontWeight = FontWeight.Medium
-//                        )
-//                    )
-//                }
-//            },
-//            shape = RoundedCornerShape(24.dp),
-//            colors = DatePickerDefaults.colors(
-//                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-//            )
-//        ) {
-//            DatePicker(
-//                state = datePickerState,
-//                colors = DatePickerDefaults.colors(
-//                    selectedDayContainerColor = MaterialTheme.colorScheme.primary,
-//                    todayDateBorderColor = MaterialTheme.colorScheme.primary
-//                )
-//            )
-//        }
-//    }
 }
 
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)

@@ -13,4 +13,15 @@
     <string name="transactions">Transactions</string>
     <string name="analyse">Analytics</string>
     <string name="tout">All</string>
+    <string name="montant">Amount</string>
+    <string name="description">Description</string>
+    <string name="ajouter_la_transaction">Add transaction</string>
+    <string name="categorie">Category</string>
+    <string name="date">Date</string>
+    <string name="ok">OK</string>
+    <string name="annuler">Cancel</string>
+    <string name="selectionnez_une_date">Pick a date</string>
+    <string name="nouvelle_transaction">New transaction</string>
+    <string name="revenu_du_mois">Monthly Income</string>
+    <string name="depense_du_mois">Monthly Expense</string>
 </resources>
