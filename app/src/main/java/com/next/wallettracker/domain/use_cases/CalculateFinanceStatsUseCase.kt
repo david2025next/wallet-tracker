@@ -1,7 +1,6 @@
 package com.next.wallettracker.domain.use_cases
 
 import com.next.wallettracker.data.models.Transaction
-import com.next.wallettracker.data.models.TransactionType
 import com.next.wallettracker.domain.models.CategoryWeight
 import com.next.wallettracker.domain.models.DailyTransactions
 import com.next.wallettracker.ui.utils.toDate

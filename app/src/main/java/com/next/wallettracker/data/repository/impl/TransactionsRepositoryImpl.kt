@@ -41,8 +41,8 @@ class TransactionsRepositoryImpl @Inject constructor(
         transactionDao.upsert(transaction.asEntity())
     }
 
-    override fun getTransactionById(id: Long): Flow<Transaction?> =
-        transactionDao.getTransactionEntityByIdStream(id).map { it?.asExternalModel() }
+    override fun getTransactionById(id: Long): Flow<Transaction> =
+        transactionDao.getTransactionEntityByIdStream(id).map { it.asExternalModel() }
 
     override fun getAllTransactionsStream(): Flow<List<Transaction>> =
         transactionDao.getAllTransactionsEntityStream()

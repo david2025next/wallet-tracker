@@ -96,5 +96,5 @@ interface TransactionDao {
     @Query("""
         SELECT * FROM transactions WHERE id =:id
     """)
-    fun getTransactionEntityByIdStream(id: Long): Flow<TransactionEntity?>
+    fun getTransactionEntityByIdStream(id: Long): Flow<TransactionEntity>
 }

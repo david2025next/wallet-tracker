@@ -42,8 +42,8 @@ class FinanceViewModel @Inject constructor(
             TransactionFilter.EXPENSE -> allTransactions.filter { it.transactionType == TransactionType.EXPENSE }
         }
 
-        val currentBalance = if(filter != TransactionFilter.ALL) null else balance
-        val stats = calculateFinanceStatsUseCase(filteredTransactions, currentBalance )
+        val balanceForTransactionFilter = if(filter != TransactionFilter.ALL) null else balance
+        val stats = calculateFinanceStatsUseCase(filteredTransactions, balanceForTransactionFilter )
 
         FinanceUiState(
             dailiesTransactions = stats.dailyTransactions,

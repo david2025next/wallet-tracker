@@ -11,6 +11,6 @@ interface TransactionsRepository {
     fun getBalance(): Flow<Double>
     fun getTotalsSpentByPeriod(start : Long, end : Long) : Flow<TransactionPeriodTotalsSpent>
     suspend fun upsertTransaction(transaction: Transaction)
-    fun getTransactionById(id : Long) : Flow<Transaction?>
+    fun getTransactionById(id : Long) : Flow<Transaction>
     fun getAllTransactionsStream() : Flow<List<Transaction>>
 }
