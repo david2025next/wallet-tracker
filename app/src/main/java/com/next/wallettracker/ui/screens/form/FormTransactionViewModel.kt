@@ -2,6 +2,7 @@ package com.next.wallettracker.ui.screens.form
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.next.wallettracker.data.models.Category
 import com.next.wallettracker.data.models.Transaction
@@ -19,6 +20,7 @@ import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -38,13 +40,7 @@ class FormTransactionViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val transactionId: Long? = savedStateHandle.get<Long?>("id")
-    private val currentBalance = transactionsRepository.getBalance()
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000L),
-            0.0
-        )
+    private val transactionId: Long? = savedStateHandle["id"]
     private val _formUiState = MutableStateFlow(FormUiState(isLoading = true))
 
     val formUiState = _formUiState.asStateFlow()
@@ -54,25 +50,28 @@ class FormTransactionViewModel @Inject constructor(
     }
 
     private fun initialize() {
-        if (transactionId != null) {
-            _formUiState.update { it.copy(isLoading = true) }
-            viewModelScope.launch {
-                val transaction =
-                    transactionsRepository.getTransactionById(transactionId).firstOrNull()
-                transaction?.let { txn ->
+
+        viewModelScope.launch {
+            transactionsRepository.getBalance().collect { balance ->
+                if (transactionId != null) {
+                    val transaction =
+                        transactionsRepository.getTransactionById(transactionId).first()
                     _formUiState.update {
                         it.copy(
-                            id = txn.id,
-                            description = txn.description,
-                            amount = txn.amount.toCurrency(),
-                            date = txn.createdAt.toDate(),
-                            category = txn.category,
-                            transactionType = txn.transactionType,
+                            id = transaction.id,
+                            description = transaction.description,
+                            amount = transaction.amount.toCurrency(),
+                            date = transaction.createdAt.toDate(),
+                            category = transaction.category,
+                            transactionType = transaction.transactionType,
                             isLoading = false,
-                            categoriesForTransactionType = getCategoriesForTransactionType(txn.transactionType)
+                            balance = balance,
+                            categoriesForTransactionType = getCategoriesForTransactionType(
+                                transaction.transactionType
+                            )
                         )
                     }
-                } ?: _formUiState.update { it.copy(isLoading = false) }
+                } else _formUiState.update { it.copy(isLoading = false, balance = balance) }
             }
         }
     }
@@ -87,6 +86,7 @@ class FormTransactionViewModel @Inject constructor(
                     )
                 )
             }
+
             is FormEvent.DateChanged -> _formUiState.update { it.copy(date = event.date) }
             is FormEvent.DescriptionChanged -> _formUiState.update { it.copy(description = event.description) }
             is FormEvent.TransactionTypeChanged -> _formUiState.update {
@@ -109,35 +109,36 @@ class FormTransactionViewModel @Inject constructor(
 
     private fun submit() {
 
-        val balanceToCheck = if (_formUiState.value.transactionType == TransactionType.EXPENSE)
-            currentBalance.value
-        else
-            null
-        val resultValidationAmount =
-            validationAmountUseCase(formUiState.value.amount, balanceToCheck)
-        val resultValidationDescription =
-            validationDescriptionUseCase(formUiState.value.description)
-
-        val hasError = listOf(
-            resultValidationDescription,
-            resultValidationAmount
-        ).any { !it.success }
-
-        if (hasError) {
-
-            _formUiState.update {
-                it.copy(
-                    errorAmount = resultValidationAmount.errorMessage,
-                    errorDescription = resultValidationDescription.errorMessage
-                )
-            }
-            return
-        }
-
         viewModelScope.launch {
+            val balanceToCheck = if (_formUiState.value.transactionType == TransactionType.EXPENSE)
+                _formUiState.value.balance
+            else
+                null
+            val resultValidationAmount =
+                validationAmountUseCase(formUiState.value.amount, balanceToCheck)
+            val resultValidationDescription =
+                validationDescriptionUseCase(formUiState.value.description)
+
+            val hasError = listOf(
+                resultValidationDescription,
+                resultValidationAmount
+            ).any { !it.success }
+
+            if (hasError) {
+
+                _formUiState.update {
+                    it.copy(
+                        errorAmount = resultValidationAmount.errorMessage,
+                        errorDescription = resultValidationDescription.errorMessage
+                    )
+                }
+                return@launch
+            }
+
             transactionsRepository.upsertTransaction(_formUiState.value.toModel())
             _formUiState.update { it.copy(message = "Transaction ajoute avec success") }
         }
+
     }
 }
 
@@ -153,6 +154,7 @@ sealed class FormEvent {
 
 data class FormUiState(
     val id: Long = 0,
+    val balance: Double = 0.0,
     val description: String = "",
     val amount: String = "500",
     val date: LocalDate = LocalDate.now(),

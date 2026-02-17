@@ -16,13 +16,8 @@ data class CategoryEntity(
     val transactionType: TransactionType
 )
 
-fun defaultCategories() : List<CategoryEntity> = listOf(
-
-    CategoryEntity(name = Category.SALARY.key, transactionType = Category.SALARY.type),
-    CategoryEntity(name = Category.BUSINESS.key, transactionType = Category.BUSINESS.type),
-    CategoryEntity(name = Category.SAVINGS.key, transactionType = Category.SAVINGS.type),
-    CategoryEntity(name = Category.FOOD.key, transactionType = Category.FOOD.type),
-    CategoryEntity(name = Category.TRANSPORT.key, transactionType = Category.TRANSPORT.type),
-    CategoryEntity(name = Category.HEALTH.key, transactionType = Category.HEALTH.type),
-    CategoryEntity(name = Category.INTERNET.key, transactionType = Category.INTERNET.type)
-)
+fun defaultCategories() : List<CategoryEntity>  = Category.entries.map { category ->
+    CategoryEntity(
+        name = category.key, transactionType = category.type
+    )
+}

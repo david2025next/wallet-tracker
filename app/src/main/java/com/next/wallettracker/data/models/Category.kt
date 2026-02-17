@@ -36,7 +36,7 @@ enum class Category(val key : String, val icon : ImageVector, val type: Transact
     INTERNET("Internet", Icons.Filled.Wifi, TransactionType.EXPENSE);
 
     companion object {
-        fun getByKey(key : String) : Category = entries.find { it.key==key }!!
+        fun getByKey(key : String) : Category = entries.find { it.key==key } ?: Category.BUSINESS
     }
 }
 

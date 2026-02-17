@@ -1,5 +1,6 @@
 package com.next.wallettracker.domain.use_cases
 
+import android.util.Log
 import com.next.wallettracker.domain.models.ValidationResult
 import javax.inject.Inject
 
@@ -22,6 +23,7 @@ class ValidationAmountUseCase @Inject constructor() {
                 )
             }
             if (balance != null) {
+                Log.d("TAG", "invoke: $balance")
                 val isCorrect = balance - amountNumber >= 0
                 if(!isCorrect){
                     return ValidationResult(
