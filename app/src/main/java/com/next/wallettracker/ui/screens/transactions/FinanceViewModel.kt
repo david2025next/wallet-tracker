@@ -31,44 +31,33 @@ class FinanceViewModel @Inject constructor(
 
     private var _selectedFilter = MutableStateFlow(TransactionFilter.ALL)
 
-    private val _financeUiState = MutableStateFlow(FinanceUiState(isLoading = true))
+    val financeUiState: StateFlow<FinanceUiState> = combine(
+        transactionsRepository.getBalance(),
+        transactionsRepository.getAllTransactionsStream(),
+        _selectedFilter
+    ) { balance, allTransactions, filter ->
+        val filteredTransactions = when (filter) {
+            TransactionFilter.ALL -> allTransactions
+            TransactionFilter.INCOME -> allTransactions.filter { it.transactionType == TransactionType.INCOME }
+            TransactionFilter.EXPENSE -> allTransactions.filter { it.transactionType == TransactionType.EXPENSE }
+        }
 
-
-    val financeUiState: StateFlow<FinanceUiState> = _financeUiState
-        .onStart { initialize() }
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5_000L),
-            FinanceUiState(isLoading = true)
+        val balanceForTransactionFilter = if (filter != TransactionFilter.ALL) null else balance
+        val stats = calculateFinanceStatsUseCase(filteredTransactions, balanceForTransactionFilter)
+        FinanceUiState(
+            isLoading = false,
+            dailiesTransactions = stats.dailyTransactions,
+            categoriesWeight = stats.categoryWeights,
+            selectedFilter = filter,
+            balance = stats.totalBalance
         )
 
-    private fun initialize(){
-
-        viewModelScope.launch {
-            combine(
-                transactionsRepository.getBalance(),
-                transactionsRepository.getAllTransactionsStream(),
-                _selectedFilter
-            ) { balance, allTransactions, filter ->
-                val filteredTransactions = when (filter) {
-                    TransactionFilter.ALL -> allTransactions
-                    TransactionFilter.INCOME -> allTransactions.filter { it.transactionType == TransactionType.INCOME }
-                    TransactionFilter.EXPENSE -> allTransactions.filter { it.transactionType == TransactionType.EXPENSE }
-                }
-
-                val balanceForTransactionFilter = if (filter != TransactionFilter.ALL) null else balance
-                val stats = calculateFinanceStatsUseCase(filteredTransactions, balanceForTransactionFilter)
-                _financeUiState.update { it.copy(
-                    isLoading = false,
-                    dailiesTransactions = stats.dailyTransactions,
-                    categoriesWeight = stats.categoryWeights,
-
-                    selectedFilter = filter,
-                    balance = stats.totalBalance
-                ) }
-            }.collect()
-        }
     }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000L),
+            FinanceUiState(isLoading = true)
+        )
 
 
     fun updateFilter(filter: TransactionFilter) {
