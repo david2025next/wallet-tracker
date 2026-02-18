@@ -9,9 +9,11 @@ import com.next.wallettracker.ui.utils.monthRange
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -67,21 +69,18 @@ class HomeViewModel @Inject constructor(private val transactionsRepository: Tran
     )
 
     val uiState = viewModelState
+        .onStart { initialize() }
         .map(HomeViewModelUiState::toUiState)
         .stateIn(
             viewModelScope,
-            SharingStarted.Eagerly,
+            SharingStarted.WhileSubscribed(5_000L),
             viewModelState.value.toUiState()
         )
 
-    init {
-        initialize()
-    }
+
 
     private fun initialize() {
         Log.d("TAG", "initialize: init")
-        viewModelState.update { it.copy(isLoading = true) }
-
         viewModelScope.launch {
             combine(
                 transactionsRepository.getBalance(),
