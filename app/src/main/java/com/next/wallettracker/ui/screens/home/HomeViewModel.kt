@@ -9,6 +9,7 @@ import com.next.wallettracker.ui.utils.monthRange
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
@@ -62,42 +63,24 @@ private data class HomeViewModelUiState(
 class HomeViewModel @Inject constructor(private val transactionsRepository: TransactionsRepository) :
     ViewModel() {
 
-    private val viewModelState = MutableStateFlow(
+    val uiState: StateFlow<HomeUiState> = combine(
+        transactionsRepository.getBalance(),
+        transactionsRepository.getRecentTransactionsStream(),
+        transactionsRepository.getTotalsSpentByPeriod(monthRange().start, monthRange().end)
+    ) { balance, recentsTransactions, totalsSpent ->
         HomeViewModelUiState(
-            isLoading = true
+            totalIncomeMonthly = totalsSpent.totalsIncome,
+            totalExpenseMonthly = totalsSpent.totalsExpense,
+            balance = balance,
+            transactions = recentsTransactions,
+            isLoading = false
         )
-    )
-
-    val uiState = viewModelState
-        .onStart { initialize() }
+    }
         .map(HomeViewModelUiState::toUiState)
         .stateIn(
             viewModelScope,
-            SharingStarted.WhileSubscribed(5_000L),
-            viewModelState.value.toUiState()
+            SharingStarted.WhileSubscribed(5000L),
+            HomeViewModelUiState(isLoading = true).toUiState()
         )
 
-
-
-    private fun initialize() {
-        Log.d("TAG", "initialize: init")
-        viewModelScope.launch {
-            combine(
-                transactionsRepository.getBalance(),
-                transactionsRepository.getRecentTransactionsStream(),
-                transactionsRepository.getTotalsSpentByPeriod(monthRange().start, monthRange().end)
-            ) { balance, recentsTransactions, totalsSpent ->
-
-                viewModelState.update {
-                    it.copy(
-                        totalIncomeMonthly = totalsSpent.totalsIncome,
-                        totalExpenseMonthly = totalsSpent.totalsExpense,
-                        balance = balance,
-                        transactions = recentsTransactions,
-                        isLoading = false
-                    )
-                }
-            }.collect()
-        }
-    }
 }

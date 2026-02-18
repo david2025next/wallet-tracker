@@ -28,7 +28,7 @@ class ValidationAmountUseCase @Inject constructor() {
                 if(!isCorrect){
                     return ValidationResult(
                         success = false,
-                        errorMessage = "Le montant depasse votre solde actuel"
+                        errorMessage = "Le montant depasse votre solde actuel [$balance]"
                     )
                 }
             }
