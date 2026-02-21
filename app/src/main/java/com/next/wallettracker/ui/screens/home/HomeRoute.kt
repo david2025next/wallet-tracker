@@ -18,23 +18,29 @@ fun HomeRoute(homeViewModel: HomeViewModel = hiltViewModel()) {
 
 @Composable
 fun HomeRoute(uiState: HomeUiState) {
-    if(uiState.isLoading){
-        LoadingContent()
-    } else{
-        when (uiState) {
-            is HomeUiState.HasTransactions -> HasTransactionsScreen(
-                balance = uiState.balance,
-                totalIncome = uiState.totalIncomeMonthly,
-                totalExpense = uiState.totalExpenseMonthly,
-                recentTransactions = uiState.transactions
-            ){WalletTrackerNavigationUtils.navigate(WalletTrackerDestination.FORM) }
 
-            is HomeUiState.NoTransactions -> EmptyTransactionsScreen(
-                image = painterResource(R.drawable.empty_wallet),
-                title = R.string.title_empty_home,
-                description = R.string.description_empty_home,
-                textButton = R.string.text_button_empty_home
-            ) { WalletTrackerNavigationUtils.navigate(WalletTrackerDestination.FORM) }
+    when (uiState) {
+        HomeUiState.Loading -> {
+            LoadingContent()
+        }
+
+        is HomeUiState.Success -> {
+
+            if (uiState.transactions.isNotEmpty()) {
+                HasTransactionsScreen(
+                    balance = uiState.balance,
+                    totalIncome = uiState.totalIncomeMonthly,
+                    totalExpense = uiState.totalExpenseMonthly,
+                    recentTransactions = uiState.transactions
+                ) { WalletTrackerNavigationUtils.navigate(WalletTrackerDestination.FORM) }
+            } else {
+                EmptyTransactionsScreen(
+                    image = painterResource(R.drawable.empty_wallet),
+                    title = R.string.title_empty_home,
+                    description = R.string.description_empty_home,
+                    textButton = R.string.text_button_empty_home
+                ) { WalletTrackerNavigationUtils.navigate(WalletTrackerDestination.FORM) }
+            }
         }
     }
 }

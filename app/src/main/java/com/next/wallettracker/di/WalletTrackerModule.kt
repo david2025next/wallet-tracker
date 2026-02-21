@@ -2,8 +2,6 @@ package com.next.wallettracker.di
 
 import android.content.Context
 import androidx.room.Room
-import androidx.room.RoomDatabase
-import androidx.sqlite.SQLiteConnection
 import com.next.wallettracker.data.local.DatabaseCallback
 import com.next.wallettracker.data.local.WalletAppDataBase
 import com.next.wallettracker.data.local.dao.TransactionDao
@@ -15,9 +13,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import javax.inject.Singleton
 
 @Module
