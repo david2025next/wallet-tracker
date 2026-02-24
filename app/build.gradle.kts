@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
+    alias(libs.plugins.jetbrains.kotlin.serialization)
 }
 
 android {
@@ -42,6 +43,12 @@ android {
 }
 
 dependencies {
+
+    // dependencies
+    implementation(libs.androidx.navigation3.ui)
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
+    implementation(libs.kotlinx.serialization.core)
 
     implementation("io.github.vanpra.compose-material-dialogs:datetime:0.8.1-rc")
     implementation(libs.androidx.navigation.compose)

@@ -15,22 +15,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowOutward
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.SouthEast
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -54,57 +50,20 @@ import com.next.wallettracker.R
 import com.next.wallettracker.data.models.Category
 import com.next.wallettracker.data.models.Transaction
 import com.next.wallettracker.data.models.TransactionType
-import com.next.wallettracker.ui.WalletTrackerDestination
-import com.next.wallettracker.ui.WalletTrackerNavigationUtils
-import com.next.wallettracker.ui.components.WalletBottomNavigation
 import com.next.wallettracker.ui.theme.WallettrackerTheme
 import com.next.wallettracker.ui.utils.humanReadableDateMonth
 import com.next.wallettracker.ui.utils.toCurrency
 
 @Composable
 fun HasTransactionsScreen(
+    modifier: Modifier = Modifier,
     balance: Double,
     totalExpense: Double,
     totalIncome: Double,
     recentTransactions: List<Transaction>,
-    modifier: Modifier = Modifier,
-    addClick: () -> Unit
-) {
-    Scaffold(
-        bottomBar = {
-            WalletBottomNavigation(selectedItemIndex = 0)
-        },
-        topBar = { HomeTopBar(R.string.app_name) },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = addClick,
-                shape = CircleShape
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Add transaction"
-                )
-            }
-        }
-    ) { paddingValues ->
-
-        Dashboard(modifier, paddingValues, balance, totalExpense, totalIncome, recentTransactions)
-    }
-}
-
-
-@Composable
-private fun Dashboard(
-    modifier: Modifier,
-    paddingValues: PaddingValues,
-    balance: Double,
-    totalExpense: Double,
-    totalIncome: Double,
-    recentTransactions: List<Transaction>
 ) {
     Column(
         modifier = modifier
-            .padding(paddingValues)
             .fillMaxSize()
     ) {
         BalanceCardOverview(balance, totalExpense, totalIncome)
@@ -122,88 +81,71 @@ private fun Dashboard(
                 color = MaterialTheme.colorScheme.onBackground,
             )
 
-            TextButton(
-                onClick = { WalletTrackerNavigationUtils.navigate(WalletTrackerDestination.TRANSACTIONS)}
-            ) {
-                Text(
-                    text = stringResource(R.string.voir_tout),
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Spacer(Modifier.width(4.dp))
-                Icon(
-                    imageVector = Icons.Filled.ChevronRight,
-                    contentDescription = null
-                )
-            }
         }
         TransactionsList(transactions = recentTransactions)
     }
+
 }
 
+
 @Composable
-fun EmptyTransactionsScreen(
+fun EmptyState(
+    modifier: Modifier = Modifier,
     image: Painter,
     @StringRes title: Int,
     @StringRes description: Int,
-    @StringRes textButton: Int,
-    onAddClick: () -> Unit
+    @StringRes onTextAction: Int?,
+    onAction: (() -> Unit )?
 ) {
-    Scaffold(
-        topBar = { HomeTopBar(R.string.app_name) }
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            contentAlignment = Alignment.Center
+    Box(
+        modifier = modifier
+            .fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-
-                Image(
-                    painter = image,
-                    contentDescription = null,
-                    modifier = Modifier.size(180.dp)
-                )
-                Spacer(Modifier.height(24.dp))
-                Text(
-                    text = stringResource(title),
-                    style = MaterialTheme.typography.headlineSmall,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text = stringResource(description),
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(Modifier.height(32.dp))
+            Image(
+                painter = image,
+                contentDescription = null,
+                modifier = Modifier.size(180.dp)
+            )
+            Spacer(Modifier.height(24.dp))
+            Text(
+                text = stringResource(title),
+                style = MaterialTheme.typography.headlineSmall,
+                textAlign = TextAlign.Center
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = stringResource(description),
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center
+            )
+            Spacer(Modifier.height(32.dp))
+            if (onTextAction != null && onAction != null) {
                 TextButton(
-                    onClick = onAddClick
+                    onClick = onAction
                 ) {
-                    Text(stringResource(textButton))
+                    Text(text = stringResource(onTextAction))
                 }
             }
+
         }
     }
 }
 
 @Composable
 fun LoadingContent(modifier: Modifier = Modifier) {
-    Scaffold(
-        topBar = { HomeTopBar(R.string.app_name) }
-    ) { paddingValues ->
-        Box(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 24.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
-        }
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+        ,
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
     }
 }
 
@@ -211,7 +153,7 @@ fun LoadingContent(modifier: Modifier = Modifier) {
 private fun TransactionsList(transactions: List<Transaction>) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(horizontal = 8.dp,)
+        contentPadding = PaddingValues(horizontal = 8.dp)
     ) {
         items(transactions) { transaction ->
             TransactionItem(transaction)
@@ -351,7 +293,7 @@ private fun BalanceCardOverview(balance: Double, totalExpense: Double, totalInco
                             horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             Text(
-                                text =" ${totalIncome.toCurrency()}",
+                                text = " ${totalIncome.toCurrency()}",
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF2E7D32)
@@ -382,7 +324,7 @@ private fun BalanceCardOverview(balance: Double, totalExpense: Double, totalInco
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text =" ${stringResource(R.string.depense_du_mois)}",
+                            text = " ${stringResource(R.string.depense_du_mois)}",
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.7f)
                         )
@@ -521,7 +463,7 @@ private fun HasTransactionsScreenPreview() {
                 totalIncome = 4500000.0,
                 recentTransactions = transactions,
                 modifier = Modifier.padding(paddingValues)
-            ) {}
+            )
         }
     }
 }

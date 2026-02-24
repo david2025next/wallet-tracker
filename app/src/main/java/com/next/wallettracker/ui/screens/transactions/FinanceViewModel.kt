@@ -23,6 +23,22 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
 
+
+sealed interface FinanceUiState {
+
+    data object LOADING : FinanceUiState
+    data class HasContent(
+        val balance: Double,
+        val selectedFilter: TransactionFilter,
+        val categoriesWeight: List<CategoryWeight>,
+        val dailiesTransactions: List<DailyTransactions>
+    ) : FinanceUiState
+
+    data class HasEmpty(
+        val selectedFilter: TransactionFilter
+    ) : FinanceUiState
+}
+
 @HiltViewModel
 class FinanceViewModel @Inject constructor(
     private val transactionsRepository: TransactionsRepository,
@@ -42,21 +58,25 @@ class FinanceViewModel @Inject constructor(
             TransactionFilter.EXPENSE -> allTransactions.filter { it.transactionType == TransactionType.EXPENSE }
         }
 
-        val balanceForTransactionFilter = if (filter != TransactionFilter.ALL) null else balance
-        val stats = calculateFinanceStatsUseCase(filteredTransactions, balanceForTransactionFilter)
-        FinanceUiState(
-            isLoading = false,
-            dailiesTransactions = stats.dailyTransactions,
-            categoriesWeight = stats.categoryWeights,
-            selectedFilter = filter,
-            balance = stats.totalBalance
-        )
+        if (filteredTransactions.isEmpty()) {
+            return@combine FinanceUiState.HasEmpty(selectedFilter = _selectedFilter.value)
+        } else {
+            val balanceForTransactionFilter = if (filter != TransactionFilter.ALL) null else balance
+            val stats =
+                calculateFinanceStatsUseCase(filteredTransactions, balanceForTransactionFilter)
+           return@combine FinanceUiState.HasContent(
+                dailiesTransactions = stats.dailyTransactions,
+                categoriesWeight = stats.categoryWeights,
+                selectedFilter = filter,
+                balance = stats.totalBalance
+            )
+        }
 
     }
         .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000L),
-            FinanceUiState(isLoading = true)
+            FinanceUiState.LOADING
         )
 
 
@@ -64,14 +84,6 @@ class FinanceViewModel @Inject constructor(
         _selectedFilter.update { filter }
     }
 }
-
-data class FinanceUiState(
-    val isLoading: Boolean = false,
-    val selectedFilter: TransactionFilter = TransactionFilter.ALL,
-    val balance: Double = 0.0,
-    val categoriesWeight: List<CategoryWeight> = emptyList(),
-    val dailiesTransactions: List<DailyTransactions> = emptyList()
-)
 
 
 enum class TransactionFilter {

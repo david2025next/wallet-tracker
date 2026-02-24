@@ -8,7 +8,6 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
@@ -29,7 +28,6 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material.icons.automirrored.filled.TrendingDown
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
@@ -39,29 +37,19 @@ import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDefaults
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -87,10 +75,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.next.wallettracker.R
 import com.next.wallettracker.data.models.Category
 import com.next.wallettracker.data.models.TransactionType
-import com.next.wallettracker.ui.WalletTrackerDestination
-import com.next.wallettracker.ui.WalletTrackerNavigationUtils
-import com.next.wallettracker.ui.utils.formatToCurrency
-import com.next.wallettracker.ui.utils.toCurrency
 import com.next.wallettracker.ui.utils.toHumanDate
 import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.datetime.date.datepicker
@@ -118,7 +102,7 @@ fun FormTransactionRoute(
         snackBarHostState = snackBarHostState,
         uiState = uiState,
         onFormEvent = formTransactionViewModel::uiEvent,
-        onNavigationBack = { WalletTrackerNavigationUtils.navigate(WalletTrackerDestination.HOME) }
+        onNavigationBack = {  }
     )
 }
 
@@ -131,127 +115,89 @@ private fun FormTransactionRoute(
     onNavigationBack: () -> Unit,
     onFormEvent: (FormEvent) -> Unit
 ) {
-    Scaffold(
-        modifier = modifier,
-        containerColor = MaterialTheme.colorScheme.surface,
-        snackbarHost = { SnackbarHost(snackBarHostState) },
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = if (uiState.id == 0L) stringResource(R.string.nouvelle_transaction) else "Modifier transaction",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    )
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick = onNavigationBack,
-                        modifier = Modifier
-                            .padding(start = 4.dp)
-                            .size(40.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Retour",
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            )
-        },
-    ) { paddingValues ->
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+
+        TransactionTypeSelector(
+            selectedTransactionTypeOrdinal = uiState.transactionType.ordinal,
+            onTransactionFilterChanged = { onFormEvent(FormEvent.TransactionTypeChanged(it)) }
+        )
+
         Column(
             modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
 
-            TransactionTypeSelector(
-                selectedTransactionTypeOrdinal = uiState.transactionType.ordinal,
-                onTransactionFilterChanged = { onFormEvent(FormEvent.TransactionTypeChanged(it)) }
+            AmountInputField(
+                label = stringResource(R.string.montant),
+                fieldValue = uiState.amount,
+                error = uiState.errorAmount,
+                transactionType = uiState.transactionType,
+                placeholder = "500",
+                onfieldInputChanged = { onFormEvent(FormEvent.AmountChanged(it)) }
             )
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(24.dp)
+            EnhancedInputField(
+                label = stringResource(R.string.description),
+                fieldValue = uiState.description,
+                placeholder = "Ex: Courses du mois",
+                icon = Icons.AutoMirrored.Filled.Notes,
+                error = uiState.errorDescription,
+                onfieldInputChanged = { onFormEvent(FormEvent.DescriptionChanged(it)) }
+            )
+
+
+            EnhancedCategoryField(
+                selectedCategory = uiState.category.key,
+                categories = uiState.categoriesForTransactionType,
+                onCategoryChanged = { onFormEvent(FormEvent.CategoryChanged(it)) }
+            )
+
+            EnhancedDateField(
+                selectedDate = uiState.date,
+                onSelectedDate = { onFormEvent(FormEvent.DateChanged(it)) }
+            )
+        }
+
+        Button(
+            onClick = { onFormEvent(FormEvent.Submit) },
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            ),
+            elevation = ButtonDefaults.buttonElevation(
+                defaultElevation = 0.dp,
+                pressedElevation = 0.dp
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(vertical = 4.dp)
             ) {
-
-                AmountInputField(
-                    label = stringResource(R.string.montant),
-                    fieldValue = uiState.amount,
-                    error = uiState.errorAmount,
-                    transactionType = uiState.transactionType,
-                    placeholder = "500",
-                    onfieldInputChanged = { onFormEvent(FormEvent.AmountChanged(it)) }
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
                 )
-
-                EnhancedInputField(
-                    label = stringResource(R.string.description),
-                    fieldValue = uiState.description,
-                    placeholder = "Ex: Courses du mois",
-                    icon = Icons.AutoMirrored.Filled.Notes,
-                    error = uiState.errorDescription,
-                    onfieldInputChanged = { onFormEvent(FormEvent.DescriptionChanged(it)) }
-                )
-
-
-                EnhancedCategoryField(
-                    selectedCategory = uiState.category.key,
-                    categories = uiState.categoriesForTransactionType,
-                    onCategoryChanged = { onFormEvent(FormEvent.CategoryChanged(it)) }
-                )
-
-                EnhancedDateField(
-                    selectedDate = uiState.date,
-                    onSelectedDate = { onFormEvent(FormEvent.DateChanged(it)) }
-                )
-            }
-
-            Button(
-                onClick = { onFormEvent(FormEvent.Submit) },
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                ),
-                elevation = ButtonDefaults.buttonElevation(
-                    defaultElevation = 0.dp,
-                    pressedElevation = 0.dp
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(vertical = 4.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = stringResource(R.string.ajouter_la_transaction),
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 0.5.sp
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = stringResource(R.string.ajouter_la_transaction),
-                        style = MaterialTheme.typography.labelLarge.copy(
-                            fontWeight = FontWeight.SemiBold,
-                            letterSpacing = 0.5.sp
-                        )
-                    )
-                }
+                )
             }
         }
     }
