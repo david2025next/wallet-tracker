@@ -28,8 +28,4 @@ val TOP_LEVEL_BAR = mapOf(
     Route.STATS to TopLevelBarItem(
         title = "Analytics"
     ),
-    Route.FORM to TopLevelBarItem(
-        title = "New Transaction",
-        navigationIcon = Icons.AutoMirrored.Filled.ArrowBack,
-    )
 )

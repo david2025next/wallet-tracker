@@ -37,6 +37,7 @@ sealed interface Route : NavKey {
 
 
 val TOP_LEVEL_ROUTES = mapOf(
+
     Route.HOME to BottomNavItem(
         title = R.string.accueil,
         selectedIcon = Icons.Filled.Home,

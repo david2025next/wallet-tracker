@@ -1,6 +1,6 @@
 package com.next.wallettracker.ui.screens.form
 
-import android.content.res.Configuration
+import android.widget.Toast
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -47,7 +47,6 @@ import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -63,11 +62,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -84,39 +83,40 @@ import java.time.LocalDate
 
 @Composable
 fun FormTransactionRoute(
+
     formTransactionViewModel: FormTransactionViewModel = hiltViewModel()
 ) {
+
     val uiState by formTransactionViewModel.formUiState.collectAsStateWithLifecycle()
-    val snackBarHostState = remember { SnackbarHostState() }
+
+    val context = LocalContext.current
+
 
     uiState.message?.let { text ->
         LaunchedEffect(Unit) {
-            snackBarHostState.showSnackbar(
-                message = text,
-                actionLabel = "OK"
-            )
+            Toast.makeText(
+                context,
+                text,
+                Toast.LENGTH_SHORT
+            ).show()
             formTransactionViewModel.reset()
         }
     }
     FormTransactionRoute(
-        snackBarHostState = snackBarHostState,
         uiState = uiState,
         onFormEvent = formTransactionViewModel::uiEvent,
-        onNavigationBack = {  }
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FormTransactionRoute(
-    snackBarHostState: SnackbarHostState,
     uiState: FormUiState,
-    modifier: Modifier = Modifier,
-    onNavigationBack: () -> Unit,
-    onFormEvent: (FormEvent) -> Unit
+    onFormEvent: (FormEvent) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = Modifier
+        modifier   = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(16.dp),
@@ -675,41 +675,5 @@ private fun EnhancedDateField(
         ) {
             onSelectedDate(it)
         }
-    }
-}
-
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
-@Composable
-private fun AddTransactionScreenPreview() {
-    MaterialTheme {
-        val snackBarHostState = remember { SnackbarHostState() }
-        FormTransactionRoute(
-            snackBarHostState = snackBarHostState,
-            uiState = FormUiState(
-                transactionType = TransactionType.INCOME,
-                amount = "25000.0",
-                description = "Salaire mensuel"
-            ),
-            onFormEvent = {},
-            onNavigationBack = {}
-        )
-    }
-}
-
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-private fun AddTransactionScreenPreviewDark() {
-    MaterialTheme {
-        val snackBarHostState = remember { SnackbarHostState() }
-        FormTransactionRoute(
-            snackBarHostState = snackBarHostState,
-            uiState = FormUiState(
-                transactionType = TransactionType.EXPENSE,
-                amount = "0.0",
-                description = ""
-            ),
-            onFormEvent = {},
-            onNavigationBack = {}
-        )
     }
 }

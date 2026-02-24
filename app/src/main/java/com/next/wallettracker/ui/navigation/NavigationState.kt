@@ -3,7 +3,6 @@ package com.next.wallettracker.ui.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSerializable
@@ -63,8 +62,8 @@ class NavigationState(
 
 @Composable
 fun NavigationState.toEntries(
-    entryProvider : (NavKey) -> NavEntry<NavKey>
-) : SnapshotStateList<NavEntry<NavKey>>{
+    entryProvider: (NavKey) -> NavEntry<NavKey>
+): SnapshotStateList<NavEntry<NavKey>> {
 
     val decoratorEntries = backStacks.mapValues { (_, stack) ->
         val decorators = listOf(

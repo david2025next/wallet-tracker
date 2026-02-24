@@ -9,6 +9,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -16,6 +18,7 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
+import com.next.wallettracker.ui.components.BottomSheetSceneStrategy
 import com.next.wallettracker.ui.components.WalletTrackerBottomBar
 import com.next.wallettracker.ui.components.WalletTrackerTopAppBar
 import com.next.wallettracker.ui.navigation.Navigator
@@ -40,6 +43,7 @@ fun WalletTrackerApp(modifier: Modifier = Modifier) {
             startRoute = Route.HOME,
             topLevelRoutes = TOP_LEVEL_ROUTES.keys
         )
+        val bottomSheetStrategy = remember { BottomSheetSceneStrategy<NavKey>() }
         val destination = TOP_LEVEL_BAR[navigationState.topLevelRoute] ?: error("Error")
         val navigator = remember { Navigator(navigationState) }
 
@@ -57,7 +61,7 @@ fun WalletTrackerApp(modifier: Modifier = Modifier) {
             floatingActionButton = {
                 if (navigationState.topLevelRoute is Route.HOME) {
                     FloatingActionButton(
-                        onClick = {navigator.navigate(Route.FORM)},
+                        onClick = { navigator.navigate(Route.FORM) },
                         shape = CircleShape
                     ) {
                         Icon(
@@ -79,11 +83,12 @@ fun WalletTrackerApp(modifier: Modifier = Modifier) {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues),
+                sceneStrategy = bottomSheetStrategy,
                 entries = navigationState.toEntries(
                     entryProvider {
-                        HomeScreen()
-                        TransactionsScreen()
-                        AnalyticsScreen()
+                        HomeEntry()
+                        TransactionsEntry()
+                        AnalyticsEntry()
                     }
                 ),
                 onBack = navigator::goBack
@@ -93,33 +98,29 @@ fun WalletTrackerApp(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun EntryProviderScope<NavKey>.AnalyticsScreen() {
+private fun EntryProviderScope<NavKey>.AnalyticsEntry() {
     entry<Route.STATS> {
         AnalyticsRoute()
     }
 }
 
 @Composable
-private fun EntryProviderScope<NavKey>.TransactionsScreen() {
+private fun EntryProviderScope<NavKey>.TransactionsEntry() {
     entry<Route.TRANSACTIONS> {
         TransactionsRoute()
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun EntryProviderScope<NavKey>.HomeScreen() {
+private fun EntryProviderScope<NavKey>.HomeEntry() {
     entry<Route.HOME> {
         HomeRoute()
     }
 
-    entry<Route.FORM> {
-        FormTransactionRoute()
-    }
-}
-
-@Composable
-private fun EntryProviderScope<NavKey>.FormScreen() {
-    entry<Route.FORM> {
+    entry<Route.FORM>(
+        metadata = BottomSheetSceneStrategy.bottomSheet()
+    ) {
         FormTransactionRoute()
     }
 }
