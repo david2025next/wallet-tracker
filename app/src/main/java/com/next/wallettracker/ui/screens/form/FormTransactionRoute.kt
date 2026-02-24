@@ -83,7 +83,6 @@ import java.time.LocalDate
 
 @Composable
 fun FormTransactionRoute(
-
     formTransactionViewModel: FormTransactionViewModel = hiltViewModel()
 ) {
 
@@ -104,7 +103,7 @@ fun FormTransactionRoute(
     }
     FormTransactionRoute(
         uiState = uiState,
-        onFormEvent = formTransactionViewModel::uiEvent,
+        onFormEvent = formTransactionViewModel::uiEvent
     )
 }
 
@@ -113,11 +112,11 @@ fun FormTransactionRoute(
 private fun FormTransactionRoute(
     uiState: FormUiState,
     onFormEvent: (FormEvent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier   = modifier
-            .fillMaxSize()
+        modifier = modifier
+            .fillMaxWidth()
             .verticalScroll(rememberScrollState())
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -166,7 +165,9 @@ private fun FormTransactionRoute(
         }
 
         Button(
-            onClick = { onFormEvent(FormEvent.Submit) },
+            onClick = {
+                onFormEvent(FormEvent.Submit)
+            },
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
@@ -365,7 +366,7 @@ fun AmountInputField(
                     decorationBox = { innerTextField ->
                         Box(
                             modifier = Modifier
-                        ){
+                        ) {
                             if (fieldValue.isEmpty()) {
                                 Text(
                                     text = placeholder,
@@ -660,7 +661,7 @@ private fun EnhancedDateField(
     }
 
     MaterialDialog(
-        dialogState = dateDialogState ,
+        dialogState = dateDialogState,
         buttons = {
             positiveButton(text = stringResource(R.string.ok))
             negativeButton(text = stringResource(R.string.annuler))

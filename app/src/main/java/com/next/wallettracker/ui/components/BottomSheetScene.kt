@@ -26,6 +26,7 @@ internal class BottomSheetScene<T : Any>(
 
     override val content: @Composable (() -> Unit) = {
         ModalBottomSheet(
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
             onDismissRequest = onBack,
             properties = modalBottomSheetProperties,
         ) {
