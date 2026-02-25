@@ -11,6 +11,7 @@ import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation3.runtime.NavKey
 import com.next.wallettracker.R
+import com.next.wallettracker.data.models.TransactionType
 import kotlinx.serialization.Serializable
 
 data class BottomNavItem(
@@ -32,7 +33,7 @@ sealed interface Route : NavKey {
     data object STATS : Route
 
     @Serializable
-    data class FORM(val transactionId : Long ?) : Route
+    data class FORM(val transactionId : Long ?, val transactionType: TransactionType?) : Route
 }
 
 

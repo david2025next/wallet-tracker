@@ -61,7 +61,14 @@ fun WalletTrackerApp(modifier: Modifier = Modifier) {
             floatingActionButton = {
                 if (navigationState.topLevelRoute is Route.HOME) {
                     FloatingActionButton(
-                        onClick = { navigator.navigate(Route.FORM(transactionId = null)) },
+                        onClick = {
+                            navigator.navigate(
+                                Route.FORM(
+                                    transactionId = null,
+                                    transactionType = null
+                                )
+                            )
+                        },
                         shape = CircleShape
                     ) {
                         Icon(
@@ -109,7 +116,8 @@ private fun EntryProviderScope<NavKey>.AnalyticsEntry() {
 private fun EntryProviderScope<NavKey>.TransactionsEntry(navigator: Navigator) {
     entry<Route.TRANSACTIONS> {
         TransactionsRoute(
-            onUpdateItem = { navigator.navigate(Route.FORM(it)) }
+            onUpdateItem = { navigator.navigate(Route.FORM(it, transactionType = null)) },
+            onAddClick = { navigator.navigate(Route.FORM(null, it)) }
         )
     }
 }
@@ -121,7 +129,8 @@ private fun EntryProviderScope<NavKey>.FormEntry() {
         metadata = BottomSheetSceneStrategy.bottomSheet()
     ) {
         FormTransactionRoute(
-            transactionId = it.transactionId
+            transactionId = it.transactionId,
+            transactionType = it.transactionType
         )
     }
 }

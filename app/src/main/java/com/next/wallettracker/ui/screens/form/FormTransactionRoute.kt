@@ -84,12 +84,19 @@ import java.time.LocalDate
 @Composable
 fun FormTransactionRoute(
     formTransactionViewModel: FormTransactionViewModel = hiltViewModel(),
-    transactionId: Long?
+    transactionId: Long?,
+    transactionType : TransactionType ? = null
 ) {
 
     val uiState by formTransactionViewModel.formUiState.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
+
+    transactionType?.let { transactionType ->
+        LaunchedEffect(key1 = Unit) {
+            formTransactionViewModel.toggleTransactionType(transactionType)
+        }
+    }
     transactionId?.let { transactionId ->
         LaunchedEffect(Unit) {
             formTransactionViewModel.loadTransaction(transactionId)

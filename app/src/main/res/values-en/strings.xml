@@ -2,7 +2,9 @@
 <resources>
     <string name="app_name">Wallet Tracker</string>
     <string name="title_empty_home">No transactions yet</string>
+    <string name="title_empty_all">No transactions yet</string>
     <string name="description_empty_home">Add your income and expenses to start tracking your budget</string>
+    <string name="description_empty_all">Add income or an expense to start tracking your budget</string>
     <string name="text_button_empty_home">Add my first transaction</string>
     <string name="solde_total">Total Balance</string>
     <string name="transactions_recentes">Recent Transactions</string>
@@ -25,4 +27,9 @@
     <string name="nouvelle_transaction">New transaction</string>
     <string name="revenu_du_mois">Monthly Income</string>
     <string name="depense_du_mois">Monthly Expense</string>
+    <string name="title_empty_income">No income yet</string>
+    <string name="title_empty_expense">No expense yet</string>
+    <string name="description_empty_income">Add inctome to start managing your budget</string>
+    <string name="description_empty_expense">Add expense to start managing your budget</string>
+    <string name="text_action">Add</string>
 </resources>

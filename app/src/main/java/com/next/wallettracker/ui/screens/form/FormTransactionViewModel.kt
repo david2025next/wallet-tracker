@@ -55,7 +55,7 @@ class FormTransactionViewModel @Inject constructor(
         }
     }
 
-    fun loadTransaction(id : Long){
+    fun loadTransaction(id: Long) {
         viewModelScope.launch {
             _formUiState.update { it.copy(isLoading = true) }
             val transaction = transactionsRepository.getTransactionById(id).first()
@@ -141,6 +141,16 @@ class FormTransactionViewModel @Inject constructor(
         }
 
     }
+
+    fun toggleTransactionType(transactionType: TransactionType) {
+        _formUiState.update {
+            it.copy(
+                transactionType = transactionType,
+                category = Category.getInitialCategory(transactionType),
+                categoriesForTransactionType = getCategoriesForTransactionType(transactionType)
+            )
+        }
+    }
 }
 
 sealed class FormEvent {
@@ -154,7 +164,7 @@ sealed class FormEvent {
 }
 
 data class FormUiState(
-    val id: Long ? = null,
+    val id: Long? = null,
     val balance: Double = 0.0,
     val description: String = "",
     val amount: String = "500",

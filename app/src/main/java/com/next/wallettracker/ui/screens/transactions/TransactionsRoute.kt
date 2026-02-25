@@ -63,6 +63,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -77,6 +78,7 @@ import com.next.wallettracker.data.models.Transaction
 import com.next.wallettracker.data.models.TransactionType
 import com.next.wallettracker.domain.models.CategoryWeight
 import com.next.wallettracker.ui.screens.home.CustomIcon
+import com.next.wallettracker.ui.screens.home.EmptyState
 import com.next.wallettracker.ui.screens.transactions.TransactionFilter.ALL
 import com.next.wallettracker.ui.theme.WallettrackerTheme
 import com.next.wallettracker.ui.utils.toCurrency
@@ -101,7 +103,8 @@ private val categoriesColors = listOf(
 @Composable
 fun TransactionsRoute(
     financeViewModel: FinanceViewModel = hiltViewModel(),
-    onUpdateItem: (Long) -> Unit
+    onUpdateItem: (Long) -> Unit,
+    onAddClick: (TransactionType?) -> Unit
 ) {
 
     val uiState by financeViewModel.financeUiState.collectAsStateWithLifecycle()
@@ -110,7 +113,8 @@ fun TransactionsRoute(
         onSelectedChanged = {
             financeViewModel.updateFilter(it)
         },
-        onUpdateItem = onUpdateItem
+        onUpdateItem = onUpdateItem,
+        onAddClick = onAddClick
     )
 }
 
@@ -120,7 +124,8 @@ private fun FinanceRoute(
     modifier: Modifier = Modifier,
     uiState: FinanceUiState,
     onSelectedChanged: (TransactionFilter) -> Unit,
-    onUpdateItem: (Long) -> Unit
+    onUpdateItem: (Long) -> Unit,
+    onAddClick: (TransactionType?) -> Unit
 ) {
     var selectedFilter by remember { mutableStateOf(ALL) }
     Column(
@@ -164,7 +169,45 @@ private fun FinanceRoute(
             }
 
             is FinanceUiState.HasEmpty -> {
-                // empty state [go to form and sho message empty]
+                val (title, description, image) = when (selectedFilter) {
+                    ALL -> {
+                        Triple(
+                            first = R.string.title_empty_all,
+                            second = R.string.description_empty_all,
+                            third = painterResource(R.drawable.empty_wallet)
+                        )
+                    }
+
+                    TransactionFilter.INCOME -> {
+                        Triple(
+                            first = R.string.title_empty_income,
+                            second = R.string.description_empty_income,
+                            third = painterResource(R.drawable.empty_income)
+                        )
+                    }
+
+                    TransactionFilter.EXPENSE -> {
+                        Triple(
+                            first = R.string.title_empty_expense,
+                            second = R.string.description_empty_expense,
+                            third = painterResource(R.drawable.empty_expense)
+                        )
+                    }
+                }
+                EmptyState(
+                    image = image,
+                    description = description,
+                    title = title,
+                    onTextAction = R.string.text_action,
+                    onAction = {
+                        val result = when (selectedFilter) {
+                            ALL -> null
+                            TransactionFilter.INCOME -> TransactionType.INCOME
+                            TransactionFilter.EXPENSE -> TransactionType.EXPENSE
+                        }
+                        onAddClick(result)
+                    }
+                )
             }
 
             FinanceUiState.LOADING -> {
@@ -188,7 +231,7 @@ fun FilterSection(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp),
+            .padding(horizontal = 8.dp, vertical = 4.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
 

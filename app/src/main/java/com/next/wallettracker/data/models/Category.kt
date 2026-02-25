@@ -37,6 +37,10 @@ enum class Category(val key : String, val icon : ImageVector, val type: Transact
 
     companion object {
         fun getByKey(key : String) : Category = entries.find { it.key==key } ?: Category.BUSINESS
+        fun getInitialCategory(type : TransactionType) = when(type) {
+            TransactionType.INCOME -> Category.BUSINESS
+            TransactionType.EXPENSE -> Category.FOOD
+        }
     }
 }
 
