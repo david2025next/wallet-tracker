@@ -53,8 +53,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -75,6 +77,7 @@ import com.next.wallettracker.data.models.Transaction
 import com.next.wallettracker.data.models.TransactionType
 import com.next.wallettracker.domain.models.CategoryWeight
 import com.next.wallettracker.ui.screens.home.CustomIcon
+import com.next.wallettracker.ui.screens.transactions.TransactionFilter.ALL
 import com.next.wallettracker.ui.theme.WallettrackerTheme
 import com.next.wallettracker.ui.utils.toCurrency
 import com.next.wallettracker.ui.utils.toHumanDate
@@ -119,52 +122,58 @@ private fun FinanceRoute(
     onSelectedChanged: (TransactionFilter) -> Unit,
     onUpdateItem: (Long) -> Unit
 ) {
-    when (uiState) {
-        is FinanceUiState.HasContent -> {
-            LazyColumn(
-                modifier = modifier
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                contentPadding = PaddingValues(
-                    bottom = 80.dp,
-                    start = 8.dp,
-                    top = 0.dp,
-                    end = 8.dp,
-                )
-            ) {
-                item {
-                    FilterSection(
-                        selectedFilter = uiState.selectedFilter,
-                        onSelectedChanged = onSelectedChanged
+    var selectedFilter by remember { mutableStateOf(ALL) }
+    Column(
+        modifier = modifier
+            .fillMaxSize(),
+    ) {
+        FilterSection(
+            selectedFilter = selectedFilter,
+            onSelectedChanged = { transactionFilter ->
+                selectedFilter = transactionFilter
+                onSelectedChanged(transactionFilter)
+            }
+        )
+        when (uiState) {
+            is FinanceUiState.HasContent -> {
+                LazyColumn(
+                    modifier = Modifier,
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    contentPadding = PaddingValues(
+                        bottom = 80.dp,
+                        start = 8.dp,
+                        top = 0.dp,
+                        end = 8.dp,
                     )
-                }
-                item {
-                    SpendingSummaryCard(
-                        balance = uiState.balance,
-                        categories = uiState.categoriesWeight
-                    )
-                }
-                uiState.dailiesTransactions.forEach { dailyTransactions ->
-                    stickyHeader(key = dailyTransactions.date) {
-                        DateHeader(date = dailyTransactions.date)
+                ) {
+                    item {
+                        SpendingSummaryCard(
+                            balance = uiState.balance,
+                            categories = uiState.categoriesWeight
+                        )
                     }
-                    items(dailyTransactions.transactions, key = { it.id }) { transaction ->
-                        TransactionItem(transaction,  onUpdateItem = onUpdateItem)
+                    uiState.dailiesTransactions.forEach { dailyTransactions ->
+                        stickyHeader(key = dailyTransactions.date) {
+                            DateHeader(date = dailyTransactions.date)
+                        }
+                        items(dailyTransactions.transactions, key = { it.id }) { transaction ->
+                            TransactionItem(transaction, onUpdateItem = onUpdateItem)
+                        }
                     }
                 }
             }
-        }
 
-        is FinanceUiState.HasEmpty -> {
-            // empty state [go to form and sho message empty]
-        }
+            is FinanceUiState.HasEmpty -> {
+                // empty state [go to form and sho message empty]
+            }
 
-        FinanceUiState.LOADING -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
+            FinanceUiState.LOADING -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
             }
         }
     }
@@ -178,7 +187,8 @@ fun FilterSection(
 
     Row(
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
 
@@ -321,7 +331,7 @@ private fun TransactionItem(
 
             FilledIconButton(
                 modifier = Modifier.size(50.dp),
-                onClick = {onUpdateItem(transaction.id)},
+                onClick = { onUpdateItem(transaction.id) },
                 colors = IconButtonDefaults.filledIconButtonColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -348,9 +358,9 @@ private fun TransactionItem(
                 )
                 .clickable(
                     onClick = {
-                      scope.launch {
-                          dragState.animateTo(DragAction.Center)
-                      }
+                        scope.launch {
+                            dragState.animateTo(DragAction.Center)
+                        }
                     },
                     enabled = true
                 ),
