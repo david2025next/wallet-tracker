@@ -9,6 +9,7 @@ import androidx.compose.foundation.gestures.AnchoredDraggableState
 import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.anchoredDraggable
+import androidx.compose.foundation.gestures.animateTo
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,10 +38,12 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -51,6 +54,7 @@ import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -74,6 +78,7 @@ import com.next.wallettracker.ui.screens.home.CustomIcon
 import com.next.wallettracker.ui.theme.WallettrackerTheme
 import com.next.wallettracker.ui.utils.toCurrency
 import com.next.wallettracker.ui.utils.toHumanDate
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import kotlin.math.roundToInt
 
@@ -102,7 +107,6 @@ fun TransactionsRoute(
         onSelectedChanged = {
             financeViewModel.updateFilter(it)
         },
-        onRemoveItem = financeViewModel::onRemoveItem,
         onUpdateItem = onUpdateItem
     )
 }
@@ -113,7 +117,6 @@ private fun FinanceRoute(
     modifier: Modifier = Modifier,
     uiState: FinanceUiState,
     onSelectedChanged: (TransactionFilter) -> Unit,
-    onRemoveItem: (Long) -> Unit,
     onUpdateItem: (Long) -> Unit
 ) {
     when (uiState) {
@@ -146,7 +149,7 @@ private fun FinanceRoute(
                         DateHeader(date = dailyTransactions.date)
                     }
                     items(dailyTransactions.transactions, key = { it.id }) { transaction ->
-                        TransactionItem(transaction, onRemoveItem = onRemoveItem, onUpdateItem = onUpdateItem)
+                        TransactionItem(transaction,  onUpdateItem = onUpdateItem)
                     }
                 }
             }
@@ -271,7 +274,6 @@ fun SpendingSummaryCard(balance: Double, categories: List<CategoryWeight>) {
 }
 
 enum class DragAction {
-    StartRevealed,
     Center,
     EndRevealed
 }
@@ -279,11 +281,11 @@ enum class DragAction {
 @Composable
 private fun TransactionItem(
     transaction: Transaction,
-    onRemoveItem: (id: Long) -> Unit,
     onUpdateItem: (id: Long) -> Unit
 ) {
 
 
+    val scope = rememberCoroutineScope()
     val density = LocalDensity.current
     val actionWidth = with(density) { 70.dp.toPx() }
     val decayAnimationSpec = rememberSplineBasedDecay<Float>()
@@ -296,7 +298,6 @@ private fun TransactionItem(
             snapAnimationSpec = tween(),
             decayAnimationSpec = decayAnimationSpec,
             anchors = DraggableAnchors {
-                DragAction.StartRevealed at actionWidth
                 DragAction.Center at 0f
                 DragAction.EndRevealed at -actionWidth
             }
@@ -315,39 +316,24 @@ private fun TransactionItem(
             modifier = Modifier
                 .fillMaxHeight()
                 .padding(horizontal = 8.dp)
-                .align(Alignment.CenterStart)
+                .align(Alignment.CenterEnd)
         ) {
-            IconButton(
-                onClick = { onUpdateItem(transaction.id) }
+
+            FilledIconButton(
+                modifier = Modifier.size(50.dp),
+                onClick = {onUpdateItem(transaction.id)},
+                colors = IconButtonDefaults.filledIconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             ) {
-                CustomIcon(
-                    icon = Icons.Default.Edit,
-                    tint = Color.White,
-                    size = 50.dp,
-                    iconSize = 25.dp,
-                    backgroundColor = MaterialTheme.colorScheme.outline
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    null
                 )
             }
         }
 
-        Box(
-            modifier = Modifier
-                .fillMaxHeight()
-                .padding(horizontal = 8.dp)
-                .align(Alignment.CenterEnd)
-        ) {
-            IconButton(
-                onClick = { onRemoveItem(transaction.id) }
-            ) {
-                CustomIcon(
-                    icon = Icons.Default.Delete,
-                    tint = Color.White,
-                    size = 50.dp,
-                    iconSize = 25.dp,
-                    backgroundColor = MaterialTheme.colorScheme.error
-                )
-            }
-        }
         ListItem(
             modifier = Modifier
                 .clip(RoundedCornerShape(16.dp))
@@ -361,7 +347,11 @@ private fun TransactionItem(
                     orientation = Orientation.Horizontal
                 )
                 .clickable(
-                    onClick = {},
+                    onClick = {
+                      scope.launch {
+                          dragState.animateTo(DragAction.Center)
+                      }
+                    },
                     enabled = true
                 ),
             tonalElevation = 2.dp,

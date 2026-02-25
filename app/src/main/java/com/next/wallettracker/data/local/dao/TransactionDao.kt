@@ -98,8 +98,4 @@ interface TransactionDao {
     """)
     fun getTransactionEntityByIdStream(id: Long): Flow<TransactionEntity>
 
-    @Query("""
-        DELETE FROM Transactions WHERE id =:id
-    """)
-    suspend fun delete(id: Long)
 }

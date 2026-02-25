@@ -48,6 +48,5 @@ class TransactionsRepositoryImpl @Inject constructor(
         transactionDao.getAllTransactionsEntityStream()
             .map { it.map(TransactionEntity::asExternalModel) }
 
-    override suspend fun remove(id: Long)  = transactionDao.delete(id)
 
 }

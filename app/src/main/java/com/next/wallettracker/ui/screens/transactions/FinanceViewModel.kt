@@ -80,11 +80,6 @@ class FinanceViewModel @Inject constructor(
         )
 
 
-    fun onRemoveItem(id : Long){
-        viewModelScope.launch {
-            transactionsRepository.remove(id)
-        }
-    }
     fun updateFilter(filter: TransactionFilter) {
         _selectedFilter.update { filter }
     }

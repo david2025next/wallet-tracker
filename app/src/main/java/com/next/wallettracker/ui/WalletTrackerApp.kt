@@ -113,12 +113,13 @@ private fun EntryProviderScope<NavKey>.TransactionsEntry(navigator: Navigator) {
         )
     }
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun EntryProviderScope<NavKey>.FormEntry(){
+private fun EntryProviderScope<NavKey>.FormEntry() {
     entry<Route.FORM>(
         metadata = BottomSheetSceneStrategy.bottomSheet()
-    ){
+    ) {
         FormTransactionRoute(
             transactionId = it.transactionId
         )
