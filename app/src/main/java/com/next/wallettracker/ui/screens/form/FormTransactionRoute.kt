@@ -83,14 +83,18 @@ import java.time.LocalDate
 
 @Composable
 fun FormTransactionRoute(
-    formTransactionViewModel: FormTransactionViewModel = hiltViewModel()
+    formTransactionViewModel: FormTransactionViewModel = hiltViewModel(),
+    transactionId: Long?
 ) {
 
     val uiState by formTransactionViewModel.formUiState.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
-
-
+    transactionId?.let { transactionId ->
+        LaunchedEffect(Unit) {
+            formTransactionViewModel.loadTransaction(transactionId)
+        }
+    }
     uiState.message?.let { text ->
         LaunchedEffect(Unit) {
             Toast.makeText(
@@ -193,7 +197,9 @@ private fun FormTransactionRoute(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = stringResource(R.string.ajouter_la_transaction),
+                    text = if (uiState.id == null) stringResource(R.string.ajouter_la_transaction) else stringResource(
+                        R.string.modifier_la_transaction
+                    ),
                     style = MaterialTheme.typography.labelLarge.copy(
                         fontWeight = FontWeight.SemiBold,
                         letterSpacing = 0.5.sp

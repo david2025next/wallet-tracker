@@ -1,7 +1,14 @@
 package com.next.wallettracker.ui.screens.transactions
 
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.AnchoredDraggableState
+import androidx.compose.foundation.gestures.DraggableAnchors
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,13 +21,18 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -28,27 +40,42 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.room.util.TableInfo
 import com.next.wallettracker.R
+import com.next.wallettracker.data.models.Category
 import com.next.wallettracker.data.models.Transaction
 import com.next.wallettracker.data.models.TransactionType
 import com.next.wallettracker.domain.models.CategoryWeight
+import com.next.wallettracker.ui.screens.home.CustomIcon
+import com.next.wallettracker.ui.theme.WallettrackerTheme
 import com.next.wallettracker.ui.utils.toCurrency
 import com.next.wallettracker.ui.utils.toHumanDate
 import java.time.LocalDate
+import kotlin.math.roundToInt
 
 private val filters = listOf(
     R.string.tout,
@@ -64,14 +91,19 @@ private val categoriesColors = listOf(
 )
 
 @Composable
-fun TransactionsRoute(financeViewModel: FinanceViewModel = hiltViewModel()) {
+fun TransactionsRoute(
+    financeViewModel: FinanceViewModel = hiltViewModel(),
+    onUpdateItem: (Long) -> Unit
+) {
 
     val uiState by financeViewModel.financeUiState.collectAsStateWithLifecycle()
     FinanceRoute(
         uiState = uiState,
         onSelectedChanged = {
             financeViewModel.updateFilter(it)
-        }
+        },
+        onRemoveItem = financeViewModel::onRemoveItem,
+        onUpdateItem = onUpdateItem
     )
 }
 
@@ -80,16 +112,29 @@ fun TransactionsRoute(financeViewModel: FinanceViewModel = hiltViewModel()) {
 private fun FinanceRoute(
     modifier: Modifier = Modifier,
     uiState: FinanceUiState,
-    onSelectedChanged: (TransactionFilter) -> Unit
+    onSelectedChanged: (TransactionFilter) -> Unit,
+    onRemoveItem: (Long) -> Unit,
+    onUpdateItem: (Long) -> Unit
 ) {
-    when(uiState) {
-        is FinanceUiState.HasContent ->{
+    when (uiState) {
+        is FinanceUiState.HasContent -> {
             LazyColumn(
                 modifier = modifier
                     .fillMaxSize(),
-                contentPadding = PaddingValues(bottom = 80.dp)
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                contentPadding = PaddingValues(
+                    bottom = 80.dp,
+                    start = 8.dp,
+                    top = 0.dp,
+                    end = 8.dp,
+                )
             ) {
-                item { FilterSection(selectedFilter = uiState.selectedFilter, onSelectedChanged = onSelectedChanged) }
+                item {
+                    FilterSection(
+                        selectedFilter = uiState.selectedFilter,
+                        onSelectedChanged = onSelectedChanged
+                    )
+                }
                 item {
                     SpendingSummaryCard(
                         balance = uiState.balance,
@@ -100,20 +145,22 @@ private fun FinanceRoute(
                     stickyHeader(key = dailyTransactions.date) {
                         DateHeader(date = dailyTransactions.date)
                     }
-                    items(dailyTransactions.transactions, key = {it.id}) { transaction ->
-                        TransactionItem(transaction)
+                    items(dailyTransactions.transactions, key = { it.id }) { transaction ->
+                        TransactionItem(transaction, onRemoveItem = onRemoveItem, onUpdateItem = onUpdateItem)
                     }
                 }
             }
         }
-        is FinanceUiState.HasEmpty ->{
+
+        is FinanceUiState.HasEmpty -> {
             // empty state [go to form and sho message empty]
         }
+
         FinanceUiState.LOADING -> {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
-            ){
+            ) {
                 CircularProgressIndicator()
             }
         }
@@ -121,12 +168,14 @@ private fun FinanceRoute(
 }
 
 @Composable
-fun FilterSection(selectedFilter: TransactionFilter, onSelectedChanged: (TransactionFilter) -> Unit) {
+fun FilterSection(
+    selectedFilter: TransactionFilter,
+    onSelectedChanged: (TransactionFilter) -> Unit
+) {
 
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
 
@@ -149,8 +198,7 @@ fun SpendingSummaryCard(balance: Double, categories: List<CategoryWeight>) {
 
     Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
+            .fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = MaterialTheme.shapes.large
     ) {
@@ -222,71 +270,152 @@ fun SpendingSummaryCard(balance: Double, categories: List<CategoryWeight>) {
     }
 }
 
-@Composable
-private fun TransactionItem(transaction: Transaction) {
+enum class DragAction {
+    StartRevealed,
+    Center,
+    EndRevealed
+}
 
-    Row(
-        modifier = Modifier
+@Composable
+private fun TransactionItem(
+    transaction: Transaction,
+    onRemoveItem: (id: Long) -> Unit,
+    onUpdateItem: (id: Long) -> Unit
+) {
+
+
+    val density = LocalDensity.current
+    val actionWidth = with(density) { 70.dp.toPx() }
+    val decayAnimationSpec = rememberSplineBasedDecay<Float>()
+
+    val dragState = remember {
+        AnchoredDraggableState(
+            initialValue = DragAction.Center,
+            positionalThreshold = { d -> d * 0.5f },
+            velocityThreshold = { with(density) { 100.dp.toPx() } },
+            snapAnimationSpec = tween(),
+            decayAnimationSpec = decayAnimationSpec,
+            anchors = DraggableAnchors {
+                DragAction.StartRevealed at actionWidth
+                DragAction.Center at 0f
+                DragAction.EndRevealed at -actionWidth
+            }
+        )
+    }
+
+    Box(
+        Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp)
-            .clickable(
-                enabled = true,
-                onClick = {}
-            ),
-        verticalAlignment = Alignment.CenterVertically
+            .background(MaterialTheme.colorScheme.background)
+            .clip(RoundedCornerShape(16.dp)),
+        contentAlignment = Alignment.Center
     ) {
-        Surface(
-            modifier = Modifier.size(48.dp),
-            shape = CircleShape
+
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(horizontal = 8.dp)
+                .align(Alignment.CenterStart)
         ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(
-                    imageVector = transaction.category.icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp)
+            IconButton(
+                onClick = { onUpdateItem(transaction.id) }
+            ) {
+                CustomIcon(
+                    icon = Icons.Default.Edit,
+                    tint = Color.White,
+                    size = 50.dp,
+                    iconSize = 25.dp,
+                    backgroundColor = MaterialTheme.colorScheme.outline
                 )
             }
         }
 
-        Spacer(modifier = Modifier.width(16.dp))
-
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = transaction.description,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.SemiBold
-            )
-            Text(
-                text = transaction.category.key,
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.Gray
-            )
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(horizontal = 8.dp)
+                .align(Alignment.CenterEnd)
+        ) {
+            IconButton(
+                onClick = { onRemoveItem(transaction.id) }
+            ) {
+                CustomIcon(
+                    icon = Icons.Default.Delete,
+                    tint = Color.White,
+                    size = 50.dp,
+                    iconSize = 25.dp,
+                    backgroundColor = MaterialTheme.colorScheme.error
+                )
+            }
         }
+        ListItem(
+            modifier = Modifier
+                .clip(RoundedCornerShape(16.dp))
+                .offset {
+                    IntOffset(
+                        dragState.requireOffset().roundToInt(), 0
+                    )
+                }
+                .anchoredDraggable(
+                    state = dragState,
+                    orientation = Orientation.Horizontal
+                )
+                .clickable(
+                    onClick = {},
+                    enabled = true
+                ),
+            tonalElevation = 2.dp,
+            shadowElevation = 4.dp,
+            headlineContent = {
+                Text(
+                    text = transaction.description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            },
+            supportingContent = {
+                Text(
+                    text = transaction.category.key,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
+            leadingContent = {
+                CustomIcon(
+                    icon = transaction.category.icon,
+                    size = 48.dp,
+                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    iconSize = 24.dp
+                )
+            },
+            trailingContent = {
+                Column {
+                    val amountColor = if (transaction.transactionType == TransactionType.INCOME)
+                        Color(0xFF2E7D32)
+                    else
+                        Color(0xFFD32F2F)
 
-        Column(horizontalAlignment = Alignment.End) {
-            val amountColor = if (transaction.transactionType == TransactionType.INCOME)
-                Color(0xFF2E7D32)
-            else
-                Color(0xFFD32F2F)
+                    val amountPrefix =
+                        if (transaction.transactionType == TransactionType.INCOME) "+$" else "-$"
 
-            val amountPrefix =
-                if (transaction.transactionType == TransactionType.INCOME) "+$" else "-$"
-
-            Text(
-                text = transaction.amount.toCurrency(),
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold,
-                color = amountColor
-            )
-            Text(
-                text = if (transaction.transactionType == TransactionType.INCOME) "Income" else "Expense",
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.Gray
-            )
-        }
+                    Text(
+                        text = transaction.amount.toCurrency(),
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = amountColor
+                    )
+                    Text(
+                        text = if (transaction.transactionType == TransactionType.INCOME) "Income" else "Expense",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
+                }
+            }
+        )
     }
 }
-
 
 @Composable
 fun DateHeader(date: LocalDate) {

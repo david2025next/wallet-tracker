@@ -153,7 +153,7 @@ fun LoadingContent(modifier: Modifier = Modifier) {
 private fun TransactionsList(transactions: List<Transaction>) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(horizontal = 8.dp)
+        contentPadding = PaddingValues( start = 8.dp, end = 8.dp, top = 0.dp, bottom = 80.dp)
     ) {
         items(transactions) { transaction ->
             TransactionItem(transaction)
@@ -236,7 +236,7 @@ private fun BalanceCardOverview(balance: Double, totalExpense: Double, totalInco
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 8.dp),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
@@ -269,7 +269,7 @@ private fun BalanceCardOverview(balance: Double, totalExpense: Double, totalInco
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Card(
@@ -280,6 +280,7 @@ private fun BalanceCardOverview(balance: Double, totalExpense: Double, totalInco
                 ) {
                     Column(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalAlignment =Alignment.CenterHorizontally,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(

@@ -36,13 +36,10 @@ import javax.inject.Inject
 class FormTransactionViewModel @Inject constructor(
     private val transactionsRepository: TransactionsRepository,
     private val validationAmountUseCase: ValidationAmountUseCase,
-    private val validationDescriptionUseCase: ValidationDescriptionUseCase,
-    private val savedStateHandle: SavedStateHandle
+    private val validationDescriptionUseCase: ValidationDescriptionUseCase
 ) : ViewModel() {
 
-    private val transactionId: Long? = savedStateHandle["id"]
     private val _formUiState = MutableStateFlow(FormUiState(isLoading = true))
-
     val formUiState = _formUiState.asStateFlow()
 
     init {
@@ -53,26 +50,30 @@ class FormTransactionViewModel @Inject constructor(
 
         viewModelScope.launch {
             transactionsRepository.getBalance().collect { balance ->
-                if (transactionId != null) {
-                    val transaction =
-                        transactionsRepository.getTransactionById(transactionId).first()
-                    _formUiState.update {
-                        it.copy(
-                            id = transaction.id,
-                            description = transaction.description,
-                            amount = transaction.amount.toCurrency(),
-                            date = transaction.createdAt.toDate(),
-                            category = transaction.category,
-                            transactionType = transaction.transactionType,
-                            isLoading = false,
-                            balance = balance,
-                            categoriesForTransactionType = getCategoriesForTransactionType(
-                                transaction.transactionType
-                            )
-                        )
-                    }
-                } else _formUiState.update { it.copy(isLoading = false, balance = balance) }
+                _formUiState.update { it.copy(balance = balance, isLoading = false) }
             }
+        }
+    }
+
+    fun loadTransaction(id : Long){
+        viewModelScope.launch {
+            _formUiState.update { it.copy(isLoading = true) }
+            val transaction = transactionsRepository.getTransactionById(id).first()
+            _formUiState.update {
+                it.copy(
+                    id = transaction.id,
+                    description = transaction.description,
+                    amount = transaction.amount.toCurrency(),
+                    date = transaction.createdAt.toDate(),
+                    category = transaction.category,
+                    transactionType = transaction.transactionType,
+                    isLoading = false,
+                    categoriesForTransactionType = getCategoriesForTransactionType(
+                        transaction.transactionType
+                    )
+                )
+            }
+
         }
     }
 
@@ -153,7 +154,7 @@ sealed class FormEvent {
 }
 
 data class FormUiState(
-    val id: Long = 0,
+    val id: Long ? = null,
     val balance: Double = 0.0,
     val description: String = "",
     val amount: String = "500",
@@ -169,7 +170,7 @@ data class FormUiState(
     val errorDescription: String? = null
 ) {
     fun toModel(): Transaction = Transaction(
-        id = id,
+        id = id ?: 0,
         description = description,
         amount = amount.toDouble(),
         createdAt = date.toMillis(),

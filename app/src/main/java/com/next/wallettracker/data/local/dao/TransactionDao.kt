@@ -97,4 +97,9 @@ interface TransactionDao {
         SELECT * FROM transactions WHERE id =:id
     """)
     fun getTransactionEntityByIdStream(id: Long): Flow<TransactionEntity>
+
+    @Query("""
+        DELETE FROM Transactions WHERE id =:id
+    """)
+    suspend fun delete(id: Long)
 }

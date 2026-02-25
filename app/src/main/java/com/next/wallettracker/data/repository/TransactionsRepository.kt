@@ -13,4 +13,5 @@ interface TransactionsRepository {
     suspend fun upsertTransaction(transaction: Transaction)
     fun getTransactionById(id : Long) : Flow<Transaction>
     fun getAllTransactionsStream() : Flow<List<Transaction>>
+    suspend fun remove(id: Long)
 }

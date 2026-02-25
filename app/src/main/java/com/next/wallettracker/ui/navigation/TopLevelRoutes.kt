@@ -32,7 +32,7 @@ sealed interface Route : NavKey {
     data object STATS : Route
 
     @Serializable
-    data object FORM : Route
+    data class FORM(val transactionId : Long ?) : Route
 }
 
 

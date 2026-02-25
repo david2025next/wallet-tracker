@@ -15,6 +15,7 @@
     <string name="montant">Montant</string>
     <string name="description">Description</string>
     <string name="ajouter_la_transaction">Ajouter la transaction</string>
+    <string name="modifier_la_transaction">Modifier la transaction</string>
     <string name="categorie">Catégorie</string>
     <string name="date">Date</string>
     <string name="ok">OK</string>
