@@ -89,6 +89,7 @@ fun WalletTrackerApp(modifier: Modifier = Modifier) {
                         HomeEntry()
                         TransactionsEntry(navigator)
                         AnalyticsEntry()
+                        FormEntry()
                     }
                 ),
                 onBack = navigator::goBack
@@ -112,6 +113,17 @@ private fun EntryProviderScope<NavKey>.TransactionsEntry(navigator: Navigator) {
         )
     }
 }
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun EntryProviderScope<NavKey>.FormEntry(){
+    entry<Route.FORM>(
+        metadata = BottomSheetSceneStrategy.bottomSheet()
+    ){
+        FormTransactionRoute(
+            transactionId = it.transactionId
+        )
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -120,11 +132,4 @@ private fun EntryProviderScope<NavKey>.HomeEntry() {
         HomeRoute()
     }
 
-    entry<Route.FORM>(
-        metadata = BottomSheetSceneStrategy.bottomSheet()
-    ) {
-        FormTransactionRoute(
-            transactionId = it.transactionId
-        )
-    }
 }
