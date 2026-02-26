@@ -85,15 +85,13 @@ fun HasTransactionsScreen(
         }
         TransactionsList(transactions = recentTransactions)
     }
-
 }
 
 @Composable
 fun LoadingContent(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
-            .fillMaxSize()
-        ,
+            .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator()
@@ -104,7 +102,7 @@ fun LoadingContent(modifier: Modifier = Modifier) {
 private fun TransactionsList(transactions: List<Transaction>) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues( start = 8.dp, end = 8.dp, top = 0.dp, bottom = 80.dp)
+        contentPadding = PaddingValues(start = 8.dp, end = 8.dp, top = 0.dp, bottom = 80.dp)
     ) {
         items(transactions) { transaction ->
             TransactionItem(transaction)
@@ -175,9 +173,7 @@ private fun BalanceCardOverview(balance: Double, totalExpense: Double, totalInco
             .fillMaxWidth()
             .padding(horizontal = 8.dp),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        ),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
@@ -194,15 +190,13 @@ private fun BalanceCardOverview(balance: Double, totalExpense: Double, totalInco
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = "${balance.toCurrency()} FCFA",
+                text = balance.toCurrency(),
                 style = MaterialTheme.typography.headlineMedium.copy(
                     fontWeight = FontWeight.Bold
                 ),
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
-
             Spacer(Modifier.height(20.dp))
-
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -211,13 +205,10 @@ private fun BalanceCardOverview(balance: Double, totalExpense: Double, totalInco
             ) {
                 Card(
                     modifier = Modifier.weight(1f),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                    )
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
                 ) {
                     Column(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
-                        horizontalAlignment =Alignment.CenterHorizontally,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
@@ -225,33 +216,14 @@ private fun BalanceCardOverview(balance: Double, totalExpense: Double, totalInco
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                         )
-
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Text(
-                                text = " ${totalIncome.toCurrency()}",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF2E7D32)
-                            )
-                            Icon(
-                                imageVector = Icons.Filled.ArrowOutward,
-                                contentDescription = null,
-                                tint = Color(0xff2e7d32),
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Text(
-                                text = "5.2%",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = Color(0xff2e7d32),
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
+                        Text(
+                            text = " ${totalIncome.toCurrency()}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF2E7D32)
+                        )
                     }
                 }
-
                 Card(
                     modifier = Modifier.weight(1f),
                     colors = CardDefaults.cardColors(
@@ -266,30 +238,12 @@ private fun BalanceCardOverview(balance: Double, totalExpense: Double, totalInco
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.7f)
                         )
-
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Text(
-                                text = " ${totalExpense.toCurrency()}",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFFD32F2F)
-                            )
-                            Icon(
-                                imageVector = Icons.Filled.SouthEast,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Text(
-                                text = "2.6%",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.error,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
+                        Text(
+                            text = " ${totalExpense.toCurrency()}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFD32F2F)
+                        )
                     }
                 }
             }

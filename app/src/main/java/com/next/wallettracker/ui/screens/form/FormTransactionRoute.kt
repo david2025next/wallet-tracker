@@ -89,9 +89,7 @@ fun FormTransactionRoute(
 ) {
 
     val uiState by formTransactionViewModel.formUiState.collectAsStateWithLifecycle()
-
     val context = LocalContext.current
-
     transactionType?.let { transactionType ->
         LaunchedEffect(key1 = Unit) {
             formTransactionViewModel.toggleTransactionType(transactionType)
@@ -137,13 +135,11 @@ private fun FormTransactionRoute(
             selectedTransactionTypeOrdinal = uiState.transactionType.ordinal,
             onTransactionFilterChanged = { onFormEvent(FormEvent.TransactionTypeChanged(it)) }
         )
-
         Column(
             modifier = Modifier
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-
             AmountInputField(
                 label = stringResource(R.string.montant),
                 fieldValue = uiState.amount,
@@ -152,7 +148,6 @@ private fun FormTransactionRoute(
                 placeholder = "500",
                 onfieldInputChanged = { onFormEvent(FormEvent.AmountChanged(it)) }
             )
-
             EnhancedInputField(
                 label = stringResource(R.string.description),
                 fieldValue = uiState.description,
@@ -161,8 +156,6 @@ private fun FormTransactionRoute(
                 error = uiState.errorDescription,
                 onfieldInputChanged = { onFormEvent(FormEvent.DescriptionChanged(it)) }
             )
-
-
             EnhancedCategoryField(
                 selectedCategory = uiState.category.key,
                 categories = uiState.categoriesForTransactionType,
@@ -174,7 +167,6 @@ private fun FormTransactionRoute(
                 onSelectedDate = { onFormEvent(FormEvent.DateChanged(it)) }
             )
         }
-
         Button(
             onClick = {
                 onFormEvent(FormEvent.Submit)
@@ -333,7 +325,6 @@ fun AmountInputField(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(bottom = 4.dp)
         )
-
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
@@ -362,7 +353,6 @@ fun AmountInputField(
                     },
                     modifier = Modifier.padding(end = 4.dp)
                 )
-
                 BasicTextField(
                     value = fieldValue,
                     onValueChange = onfieldInputChanged,
@@ -391,7 +381,6 @@ fun AmountInputField(
                         }
                     }
                 )
-
                 Text(
                     text = "FCFA",
                     style = MaterialTheme.typography.bodyLarge.copy(
@@ -444,7 +433,6 @@ fun EnhancedInputField(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(bottom = 4.dp)
         )
-
         OutlinedTextField(
             value = fieldValue,
             onValueChange = onfieldInputChanged,
@@ -483,7 +471,6 @@ fun EnhancedInputField(
                 errorBorderColor = MaterialTheme.colorScheme.error
             )
         )
-
         if (error != null) {
             Row(
                 modifier = Modifier.padding(start = 16.dp, top = 8.dp),
@@ -526,7 +513,6 @@ private fun EnhancedCategoryField(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(bottom = 4.dp)
         )
-
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = it }
@@ -628,7 +614,6 @@ private fun EnhancedDateField(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(bottom = 4.dp)
         )
-
         OutlinedTextField(
             value = selectedDate.toHumanDate(),
             onValueChange = {},
@@ -672,7 +657,6 @@ private fun EnhancedDateField(
             )
         )
     }
-
     MaterialDialog(
         dialogState = dateDialogState,
         buttons = {

@@ -254,7 +254,7 @@ private fun SpendingSummaryCard(balance: Double, categories: List<CategoryWeight
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
-                    text = "${balance.toCurrency()} FCFA",
+                    text = balance.toCurrency(),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )

@@ -7,11 +7,5 @@ fun Double.toCurrency() : String{
     val format = NumberFormat
         .getInstance()
         .format(this)
-    return "$format"
-}
-
-fun String.formatToCurrency() : String {
-    return NumberFormat
-        .getInstance()
-        .format(this.toDoubleOrNull() ?: 0.0)
+    return "$format Fcfa"
 }
