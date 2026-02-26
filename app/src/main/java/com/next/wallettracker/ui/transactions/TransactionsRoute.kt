@@ -107,8 +107,7 @@ fun TransactionsRoute(
 data class DataEmptyState(
     @StringRes val title : Int,
     @StringRes val description : Int,
-    val image : Painter,
-    @StringRes val textAction : Int
+    val image : Painter
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -169,8 +168,7 @@ private fun FinanceRoute(
                         DataEmptyState(
                             R.string.title_empty_all,
                             R.string.description_empty_all,
-                            painterResource(R.drawable.empty_wallet),
-                            R.string.text_button_empty_home
+                            painterResource(R.drawable.empty_wallet)
                         )
                     }
 
@@ -179,7 +177,6 @@ private fun FinanceRoute(
                             R.string.title_empty_income,
                              R.string.description_empty_income,
                             painterResource(R.drawable.empty_income),
-                            R.string.text_button_empty_income
                         )
                     }
 
@@ -188,23 +185,13 @@ private fun FinanceRoute(
                             R.string.title_empty_expense,
                             R.string.description_empty_expense,
                             painterResource(R.drawable.empty_expense),
-                            R.string.text_button_empty_expense
                         )
                     }
                 }
                 EmptyState(
                     image = dataEmptyState.image,
                     description = dataEmptyState.description,
-                    title = dataEmptyState.title,
-                    onTextAction = dataEmptyState.textAction,
-                    onAction = {
-                        val result = when (selectedFilter) {
-                            TransactionFilter.ALL -> null
-                            TransactionFilter.INCOME -> TransactionType.INCOME
-                            TransactionFilter.EXPENSE -> TransactionType.EXPENSE
-                        }
-                        onAddClick(result)
-                    }
+                    title = dataEmptyState.title
                 )
             }
 

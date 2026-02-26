@@ -1,17 +1,20 @@
 package com.next.wallettracker.ui
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -35,7 +38,7 @@ import com.next.wallettracker.ui.theme.WallettrackerTheme
 @Composable
 fun WalletTrackerApp(modifier: Modifier = Modifier) {
 
-    WallettrackerTheme {
+    WallettrackerTheme(darkTheme = true) {
 
         val navigationState = rememberNavigationState(
             startRoute = Route.HOME,
@@ -56,23 +59,26 @@ fun WalletTrackerApp(modifier: Modifier = Modifier) {
                     actionIconContentDescription = destination.actionIconContentDescription
                 )
             },
+            floatingActionButtonPosition = FabPosition.Center,
             floatingActionButton = {
-                if (navigationState.topLevelRoute is Route.HOME) {
-                    FloatingActionButton(
-                        onClick = {
-                            navigator.navigate(
-                                Route.FORM(
-                                    transactionId = null,
-                                    transactionType = null
-                                )
+                FloatingActionButton(
+                    modifier = Modifier
+                        .offset(
+                            y = 60.dp
+                        ),
+                    onClick = {
+                        navigator.navigate(
+                            Route.FORM(
+                                transactionId = null,
+                                transactionType = null
                             )
-                        },
-                        shape = CircleShape
-                    ) {
-                        Icon(
-                            Icons.Default.Add, null
                         )
-                    }
+                    },
+                    shape = CircleShape
+                ) {
+                    Icon(
+                        Icons.Default.Add, null
+                    )
                 }
             },
             bottomBar = {
@@ -93,7 +99,7 @@ fun WalletTrackerApp(modifier: Modifier = Modifier) {
                     entryProvider {
                         HomeEntry()
                         TransactionsEntry(navigator)
-                        AnalyticsEntry()
+                        //AnalyticsEntry()
                         FormEntry()
                     }
                 ),

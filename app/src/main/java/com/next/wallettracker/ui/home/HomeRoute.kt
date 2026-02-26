@@ -39,9 +39,7 @@ fun HomeRoute(uiState: HomeUiState, modifier: Modifier = Modifier) {
                 EmptyState(
                     image = painterResource(R.drawable.empty_wallet),
                     title = R.string.title_empty_home,
-                    description = R.string.description_empty_home,
-                    onTextAction = null,
-                    onAction = null
+                    description = R.string.description_empty_home
                 )
             }
         }

@@ -24,9 +24,7 @@ fun EmptyState(
     modifier: Modifier = Modifier,
     image: Painter,
     @StringRes title: Int,
-    @StringRes description: Int,
-    @StringRes onTextAction: Int?,
-    onAction: (() -> Unit )?
+    @StringRes description: Int
 ) {
     Box(
         modifier = modifier
@@ -54,14 +52,6 @@ fun EmptyState(
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center
             )
-            Spacer(Modifier.height(32.dp))
-            if (onTextAction != null && onAction != null) {
-                TextButton(
-                    onClick = onAction
-                ) {
-                    Text(text = stringResource(onTextAction))
-                }
-            }
         }
     }
 }

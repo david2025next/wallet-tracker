@@ -49,9 +49,9 @@ val TOP_LEVEL_ROUTES = mapOf(
         selectedIcon = Icons.Filled.SwapHoriz,
         unselectedIcon = Icons.Outlined.SwapHoriz,
     ),
-    Route.STATS to BottomNavItem(
-        title = R.string.analyse,
-        selectedIcon = Icons.Filled.Analytics,
-        unselectedIcon = Icons.Outlined.Analytics,
-    )
+//    Route.STATS to BottomNavItem(
+//        title = R.string.analyse,
+//        selectedIcon = Icons.Filled.Analytics,
+//        unselectedIcon = Icons.Outlined.Analytics,
+//    )
 )

@@ -44,6 +44,7 @@ android {
 
 dependencies {
 
+    implementation("co.yml:ycharts:2.1.0")
     // dependencies
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.androidx.navigation3.runtime)
