@@ -1,5 +1,6 @@
 package com.next.wallettracker.ui.transactions
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.AnchoredDraggableState
@@ -50,6 +51,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -102,6 +104,13 @@ fun TransactionsRoute(
     )
 }
 
+data class DataEmptyState(
+    @StringRes val title : Int,
+    @StringRes val description : Int,
+    val image : Painter,
+    @StringRes val textAction : Int
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FinanceRoute(
@@ -152,37 +161,42 @@ private fun FinanceRoute(
                 }
             }
 
+
             is FinanceUiState.HasEmpty -> {
-                val (title, description, image) = when (selectedFilter) {
+                val dataEmptyState = when (selectedFilter) {
                     TransactionFilter.ALL -> {
-                        Triple(
-                            first = R.string.title_empty_all,
-                            second = R.string.description_empty_all,
-                            third = painterResource(R.drawable.empty_wallet)
+
+                        DataEmptyState(
+                            R.string.title_empty_all,
+                            R.string.description_empty_all,
+                            painterResource(R.drawable.empty_wallet),
+                            R.string.text_button_empty_home
                         )
                     }
 
                     TransactionFilter.INCOME -> {
-                        Triple(
-                            first = R.string.title_empty_income,
-                            second = R.string.description_empty_income,
-                            third = painterResource(R.drawable.empty_income)
+                        DataEmptyState(
+                            R.string.title_empty_income,
+                             R.string.description_empty_income,
+                            painterResource(R.drawable.empty_income),
+                            R.string.text_button_empty_income
                         )
                     }
 
                     TransactionFilter.EXPENSE -> {
-                        Triple(
-                            first = R.string.title_empty_expense,
-                            second = R.string.description_empty_expense,
-                            third = painterResource(R.drawable.empty_expense)
+                        DataEmptyState(
+                            R.string.title_empty_expense,
+                            R.string.description_empty_expense,
+                            painterResource(R.drawable.empty_expense),
+                            R.string.text_button_empty_expense
                         )
                     }
                 }
                 EmptyState(
-                    image = image,
-                    description = description,
-                    title = title,
-                    onTextAction = R.string.text_action,
+                    image = dataEmptyState.image,
+                    description = dataEmptyState.description,
+                    title = dataEmptyState.title,
+                    onTextAction = dataEmptyState.textAction,
                     onAction = {
                         val result = when (selectedFilter) {
                             TransactionFilter.ALL -> null

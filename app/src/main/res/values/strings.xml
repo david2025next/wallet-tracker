@@ -9,6 +9,8 @@
     <string name="description_empty_expense">Ajoutez une depense pour commencer a gerer votre budget</string>
     <string name="description_empty_all">Ajoutez un revenu ou une depense pour commencer a suivre votre budget</string>
     <string name="text_button_empty_home">Ajoutez ma premiere transaction</string>
+    <string name="text_button_empty_expense">Ajoutez ma premiere depense</string>
+    <string name="text_button_empty_income">Ajoutez mon premier revenu</string>
     <string name="solde_total">Solde Total</string>
     <string name="transactions_recentes">Transactions Recentes</string>
     <string name="revenu">Revenu</string>

@@ -64,7 +64,6 @@ class FinanceViewModel @Inject constructor(
                 balance = stats.totalBalance
             )
         }
-
     }
         .stateIn(
             viewModelScope,
