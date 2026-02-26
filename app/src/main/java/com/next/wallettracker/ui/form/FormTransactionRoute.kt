@@ -1,4 +1,4 @@
-package com.next.wallettracker.ui.screens.form
+package com.next.wallettracker.ui.form
 
 import android.widget.Toast
 import androidx.compose.animation.animateColorAsState

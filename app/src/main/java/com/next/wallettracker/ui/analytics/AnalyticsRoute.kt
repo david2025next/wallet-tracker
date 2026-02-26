@@ -1,4 +1,4 @@
-package com.next.wallettracker.ui.screens.analytics
+package com.next.wallettracker.ui.analytics
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize

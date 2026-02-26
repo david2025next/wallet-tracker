@@ -9,8 +9,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -27,10 +25,10 @@ import com.next.wallettracker.ui.navigation.TOP_LEVEL_BAR
 import com.next.wallettracker.ui.navigation.TOP_LEVEL_ROUTES
 import com.next.wallettracker.ui.navigation.rememberNavigationState
 import com.next.wallettracker.ui.navigation.toEntries
-import com.next.wallettracker.ui.screens.analytics.AnalyticsRoute
-import com.next.wallettracker.ui.screens.form.FormTransactionRoute
-import com.next.wallettracker.ui.screens.home.HomeRoute
-import com.next.wallettracker.ui.screens.transactions.TransactionsRoute
+import com.next.wallettracker.ui.analytics.AnalyticsRoute
+import com.next.wallettracker.ui.form.FormTransactionRoute
+import com.next.wallettracker.ui.home.HomeRoute
+import com.next.wallettracker.ui.transactions.TransactionsRoute
 import com.next.wallettracker.ui.theme.WallettrackerTheme
 
 @OptIn(ExperimentalMaterial3Api::class)

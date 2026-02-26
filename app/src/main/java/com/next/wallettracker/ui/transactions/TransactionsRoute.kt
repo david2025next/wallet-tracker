@@ -1,4 +1,4 @@
-package com.next.wallettracker.ui.screens.transactions
+package com.next.wallettracker.ui.transactions
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -65,7 +65,6 @@ import com.next.wallettracker.ui.common.CustomIcon
 import com.next.wallettracker.ui.common.DragAction
 import com.next.wallettracker.ui.common.EmptyState
 import com.next.wallettracker.ui.common.rememberAnchoredDraggableState
-import com.next.wallettracker.ui.screens.transactions.TransactionFilter.ALL
 import com.next.wallettracker.ui.utils.toCurrency
 import com.next.wallettracker.ui.utils.toHumanDate
 import kotlinx.coroutines.launch
@@ -112,7 +111,7 @@ private fun FinanceRoute(
     onUpdateItem: (Long) -> Unit,
     onAddClick: (TransactionType?) -> Unit
 ) {
-    var selectedFilter by remember { mutableStateOf(ALL) }
+    var selectedFilter by remember { mutableStateOf(TransactionFilter.ALL) }
     Column(
         modifier = modifier
             .fillMaxSize(),
@@ -155,7 +154,7 @@ private fun FinanceRoute(
 
             is FinanceUiState.HasEmpty -> {
                 val (title, description, image) = when (selectedFilter) {
-                    ALL -> {
+                    TransactionFilter.ALL -> {
                         Triple(
                             first = R.string.title_empty_all,
                             second = R.string.description_empty_all,
@@ -186,7 +185,7 @@ private fun FinanceRoute(
                     onTextAction = R.string.text_action,
                     onAction = {
                         val result = when (selectedFilter) {
-                            ALL -> null
+                            TransactionFilter.ALL -> null
                             TransactionFilter.INCOME -> TransactionType.INCOME
                             TransactionFilter.EXPENSE -> TransactionType.EXPENSE
                         }

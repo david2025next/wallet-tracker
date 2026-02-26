@@ -1,10 +1,9 @@
-package com.next.wallettracker.ui.screens.form
+package com.next.wallettracker.ui.form
 
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
-import com.next.wallettracker.ui.utils.formatToCurrency
 
 class CurrencyVisualTransformation : VisualTransformation {
 

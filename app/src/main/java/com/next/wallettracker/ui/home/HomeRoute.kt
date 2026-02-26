@@ -1,4 +1,4 @@
-package com.next.wallettracker.ui.screens.home
+package com.next.wallettracker.ui.home
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable

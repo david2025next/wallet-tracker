@@ -1,26 +1,19 @@
-package com.next.wallettracker.ui.screens.transactions
+package com.next.wallettracker.ui.transactions
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.next.wallettracker.data.models.Transaction
 import com.next.wallettracker.data.models.TransactionType
 import com.next.wallettracker.data.repository.TransactionsRepository
 import com.next.wallettracker.domain.models.CategoryWeight
 import com.next.wallettracker.domain.models.DailyTransactions
 import com.next.wallettracker.domain.use_cases.CalculateFinanceStatsUseCase
-import com.next.wallettracker.ui.utils.toDate
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-import java.time.LocalDate
 import javax.inject.Inject
 
 
