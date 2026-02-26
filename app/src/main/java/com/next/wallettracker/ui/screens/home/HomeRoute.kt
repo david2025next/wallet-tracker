@@ -8,6 +8,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.next.wallettracker.R
+import com.next.wallettracker.ui.common.EmptyState
 
 @Composable
 fun HomeRoute(homeViewModel: HomeViewModel = hiltViewModel()) {

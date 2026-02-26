@@ -1,12 +1,8 @@
 package com.next.wallettracker.ui.screens.transactions
 
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.AnchoredDraggableState
-import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.gestures.animateTo
@@ -26,13 +22,11 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -42,15 +36,10 @@ import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -60,27 +49,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.room.util.TableInfo
 import com.next.wallettracker.R
-import com.next.wallettracker.data.models.Category
 import com.next.wallettracker.data.models.Transaction
 import com.next.wallettracker.data.models.TransactionType
 import com.next.wallettracker.domain.models.CategoryWeight
-import com.next.wallettracker.ui.screens.home.CustomIcon
-import com.next.wallettracker.ui.screens.home.EmptyState
+import com.next.wallettracker.ui.common.CustomIcon
+import com.next.wallettracker.ui.common.DragAction
+import com.next.wallettracker.ui.common.EmptyState
+import com.next.wallettracker.ui.common.rememberAnchoredDraggableState
 import com.next.wallettracker.ui.screens.transactions.TransactionFilter.ALL
-import com.next.wallettracker.ui.theme.WallettrackerTheme
 import com.next.wallettracker.ui.utils.toCurrency
 import com.next.wallettracker.ui.utils.toHumanDate
 import kotlinx.coroutines.launch
@@ -223,7 +208,7 @@ private fun FinanceRoute(
 }
 
 @Composable
-fun FilterSection(
+private fun FilterSection(
     selectedFilter: TransactionFilter,
     onSelectedChanged: (TransactionFilter) -> Unit
 ) {
@@ -250,7 +235,7 @@ fun FilterSection(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun SpendingSummaryCard(balance: Double, categories: List<CategoryWeight>) {
+private fun SpendingSummaryCard(balance: Double, categories: List<CategoryWeight>) {
 
     Card(
         modifier = Modifier
@@ -326,37 +311,16 @@ fun SpendingSummaryCard(balance: Double, categories: List<CategoryWeight>) {
     }
 }
 
-enum class DragAction {
-    Center,
-    EndRevealed
-}
+
 
 @Composable
 private fun TransactionItem(
     transaction: Transaction,
-    onUpdateItem: (id: Long) -> Unit
+    onUpdateItem: (id: Long) -> Unit = {},
+    draggableState : AnchoredDraggableState<DragAction> = rememberAnchoredDraggableState()
 ) {
 
-
     val scope = rememberCoroutineScope()
-    val density = LocalDensity.current
-    val actionWidth = with(density) { 70.dp.toPx() }
-    val decayAnimationSpec = rememberSplineBasedDecay<Float>()
-
-    val dragState = remember {
-        AnchoredDraggableState(
-            initialValue = DragAction.Center,
-            positionalThreshold = { d -> d * 0.5f },
-            velocityThreshold = { with(density) { 100.dp.toPx() } },
-            snapAnimationSpec = tween(),
-            decayAnimationSpec = decayAnimationSpec,
-            anchors = DraggableAnchors {
-                DragAction.Center at 0f
-                DragAction.EndRevealed at -actionWidth
-            }
-        )
-    }
-
     Box(
         Modifier
             .fillMaxWidth()
@@ -392,17 +356,17 @@ private fun TransactionItem(
                 .clip(RoundedCornerShape(16.dp))
                 .offset {
                     IntOffset(
-                        dragState.requireOffset().roundToInt(), 0
+                        draggableState.requireOffset().roundToInt(), 0
                     )
                 }
                 .anchoredDraggable(
-                    state = dragState,
+                    state = draggableState,
                     orientation = Orientation.Horizontal
                 )
                 .clickable(
                     onClick = {
                         scope.launch {
-                            dragState.animateTo(DragAction.Center)
+                            draggableState.animateTo(DragAction.Center)
                         }
                     },
                     enabled = true
@@ -461,7 +425,7 @@ private fun TransactionItem(
 }
 
 @Composable
-fun DateHeader(date: LocalDate) {
+private fun DateHeader(date: LocalDate) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(

@@ -50,6 +50,7 @@ import com.next.wallettracker.R
 import com.next.wallettracker.data.models.Category
 import com.next.wallettracker.data.models.Transaction
 import com.next.wallettracker.data.models.TransactionType
+import com.next.wallettracker.ui.common.CustomIcon
 import com.next.wallettracker.ui.theme.WallettrackerTheme
 import com.next.wallettracker.ui.utils.humanReadableDateMonth
 import com.next.wallettracker.ui.utils.toCurrency
@@ -85,56 +86,6 @@ fun HasTransactionsScreen(
         TransactionsList(transactions = recentTransactions)
     }
 
-}
-
-
-@Composable
-fun EmptyState(
-    modifier: Modifier = Modifier,
-    image: Painter,
-    @StringRes title: Int,
-    @StringRes description: Int,
-    @StringRes onTextAction: Int?,
-    onAction: (() -> Unit )?
-) {
-    Box(
-        modifier = modifier
-            .fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-
-            Image(
-                painter = image,
-                contentDescription = null,
-                modifier = Modifier.size(180.dp)
-            )
-            Spacer(Modifier.height(24.dp))
-            Text(
-                text = stringResource(title),
-                style = MaterialTheme.typography.headlineSmall,
-                textAlign = TextAlign.Center
-            )
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = stringResource(description),
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center
-            )
-            Spacer(Modifier.height(32.dp))
-            if (onTextAction != null && onAction != null) {
-                TextButton(
-                    onClick = onAction
-                ) {
-                    Text(text = stringResource(onTextAction))
-                }
-            }
-
-        }
-    }
 }
 
 @Composable
@@ -213,20 +164,6 @@ private fun TransactionItem(transaction: Transaction) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-        }
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun HomeTopBar(@StringRes title: Int) {
-
-    CenterAlignedTopAppBar(
-        title = {
-            Text(
-                text = stringResource(title),
-                style = MaterialTheme.typography.titleLarge
-            )
         }
     )
 }
@@ -359,112 +296,4 @@ private fun BalanceCardOverview(balance: Double, totalExpense: Double, totalInco
         }
     }
 
-}
-
-@Composable
-fun CustomIcon(
-    icon: ImageVector,
-    size: Dp,
-    backgroundColor: Color,
-    tint: Color,
-    iconSize: Dp,
-    modifier: Modifier = Modifier,
-    contentDescription: String? = null
-) {
-    Box(
-        modifier = modifier
-            .size(size)
-            .clip(CircleShape)
-            .background(backgroundColor),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = contentDescription,
-            tint = tint,
-            modifier = Modifier.size(iconSize)
-        )
-    }
-}
-
-
-@Preview
-@Composable
-private fun TransactionItemPreview() {
-
-    val transaction = Transaction(
-        id = 1,
-        description = "Salaire Janvier",
-        amount = 250000.0,
-        category = Category.SALARY,
-        createdAt = System.currentTimeMillis(),
-        transactionType = TransactionType.INCOME
-    )
-    TransactionItem(
-        transaction
-    )
-}
-
-@Preview
-@Composable
-private fun HasTransactionsScreenPreview() {
-    val transactions = listOf(
-
-        Transaction(
-            id = 1,
-            description = "Salaire Janvier",
-            amount = 250000.0,
-            category = Category.SALARY,
-            createdAt = System.currentTimeMillis(),
-            transactionType = TransactionType.INCOME
-        ),
-
-        Transaction(
-            id = 2,
-            description = "Vente application étudiant",
-            amount = 50000.0,
-            category = Category.BUSINESS,
-            createdAt = System.currentTimeMillis(),
-            transactionType = TransactionType.INCOME
-        ),
-
-        Transaction(
-            id = 3,
-            description = "Déjeuner restaurant",
-            amount = 4500.0,
-            category = Category.FOOD,
-            createdAt = System.currentTimeMillis(),
-            transactionType = TransactionType.EXPENSE
-        ),
-
-        Transaction(
-            id = 4,
-            description = "Taxi pour l'école",
-            amount = 3000.0,
-            category = Category.TRANSPORT,
-            createdAt = System.currentTimeMillis(),
-            transactionType = TransactionType.EXPENSE
-        ),
-
-        Transaction(
-            id = 5,
-            description = "Abonnement Internet",
-            amount = 20000.0,
-            category = Category.INTERNET,
-            createdAt = System.currentTimeMillis(),
-            transactionType = TransactionType.EXPENSE
-        )
-    )
-
-    WallettrackerTheme {
-        Scaffold { paddingValues ->
-            HasTransactionsScreen(
-                balance = 120000000.0,
-                totalExpense = 2500000.0,
-                totalIncome = 4500000.0,
-                recentTransactions = transactions,
-                modifier = Modifier.padding(paddingValues)
-            )
-        }
-    }
 }
